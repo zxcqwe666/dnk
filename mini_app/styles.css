@@ -1,13 +1,13 @@
 :root {
   color-scheme: dark;
-  --bg: #0f1115;
-  --bg-elevated: #181b22;
-  --accent: #ff4fd8;
-  --accent-soft: rgba(255, 79, 216, 0.16);
-  --accent-strong: rgba(255, 79, 216, 0.3);
-  --text: #f9fbff;
-  --text-muted: #9aa0b5;
-  --border-subtle: #262a35;
+  --bg: #05070a;
+  --bg-elevated: #111522;
+  --accent: #4ff2c4;
+  --accent-soft: rgba(79, 242, 196, 0.14);
+  --accent-strong: rgba(79, 242, 196, 0.35);
+  --text: #f5fbff;
+  --text-muted: #8c9bb5;
+  --border-subtle: #262f3e;
   --radius-lg: 18px;
   --radius-md: 14px;
   --radius-pill: 999px;
@@ -23,8 +23,10 @@ body {
   margin: 0;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
     "Roboto", sans-serif;
-  background: radial-gradient(circle at top left, #1d1530, #07060a 55%);
+  background: radial-gradient(circle at top left, #040612, #020308 55%);
   color: var(--text);
+  font-size: 15px;
+  line-height: 1.4;
 }
 
 #app {
@@ -95,10 +97,13 @@ body {
   align-items: center;
   gap: 6px;
   font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
 }
 
 .icon-button:active {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(1px);
 }
 
 .badge {
@@ -211,10 +216,13 @@ body {
   font-size: 12px;
   background: rgba(255, 255, 255, 0.08);
   color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
 }
 
 .secondary-button:active {
   background: rgba(255, 255, 255, 0.14);
+  transform: translateY(1px);
 }
 
 .cart-panel {
@@ -308,10 +316,14 @@ body {
   background: linear-gradient(135deg, #ffb86c, #ff4fd8);
   color: #16061e;
   box-shadow: 0 14px 30px rgba(255, 79, 216, 0.6);
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.15s ease, opacity 0.15s ease;
 }
 
 .primary-button:active {
   opacity: 0.9;
+  transform: translateY(1px);
+  box-shadow: 0 8px 18px rgba(255, 79, 216, 0.45);
 }
 
 .cart-footer {
@@ -493,11 +505,12 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  padding: 8px 14px 12px;
+  padding: 8px 14px calc(12px + env(safe-area-inset-bottom, 0px));
   display: flex;
   gap: 8px;
   background: linear-gradient(180deg, rgba(8, 9, 16, 0), #050509 60%);
   backdrop-filter: blur(18px);
+  box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.9);
 }
 
 .bottom-nav-item {
@@ -508,6 +521,9 @@ body {
   color: var(--text-muted);
   font-size: 13px;
   padding: 8px 10px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease,
+    transform 0.1s ease;
 }
 
 .bottom-nav-item--active {
