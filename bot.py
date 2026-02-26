@@ -94,17 +94,14 @@ def format_price(amount: int) -> str:
 
 def main_menu_kb() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
-    
-    # Основные действия
-    kb.button(text="🦄 Открыть магазин", web_app=WebAppInfo(url=WEBAPP_URL) if WEBAPP_URL else None)
-    kb.button(text="📦 Каталог товаров", callback_data="menu:catalog")
-    kb.button(text="🛒 Моя корзина", callback_data="menu:cart")
-    
-    # Информация
-    kb.button(text="ℹ️ О нас", callback_data="menu:about")
-    kb.button(text="📞 Поддержка", callback_data="menu:support")
-    
-    kb.adjust(2, 2, 1)
+    if WEBAPP_URL:
+        kb.button(
+            text="Открыть магазин 🦄",
+            web_app=WebAppInfo(url=WEBAPP_URL),
+        )
+    else:
+        kb.button(text="Mini App недоступен", callback_data="menu:noop")
+    kb.adjust(1)
     return kb.as_markup()
 
 
@@ -161,34 +158,22 @@ def get_cart(storage: Dict, user_id: int) -> Dict[str, int]:
 async def cmd_start(message: Message, state: FSMContext) -> None:
     await state.clear()
     text = (
-        "👋 *Добро пожаловать в DNK Store!*\n\n"
-        "🔥 *Оригинальные кроссовки и одежда по лучшим ценам*\n\n"
-        "✅ 100% оригинальная продукция\n"
-        "✅ Быстрая доставка по России\n"
-        "✅ Гарантия качества\n\n"
-        "🛍 *Выберите удобный способ заказа:*"
+        "Привет! 👋\n\n"
+        "Я бот-магазин оригинальных кроссовок и одежды.\n"
+        "Чтобы оформить заказ, открой мини‑приложение:"
     )
-    await message.answer(text, reply_markup=main_menu_kb(), parse_mode="Markdown")
+    await message.answer(text, reply_markup=main_menu_kb())
 
 
 async def cmd_catalog(message: Message, state: FSMContext) -> None:
     await state.set_state(OrderStates.choosing_category)
-    await message.answer(
-        "📦 *Выберите категорию товара:*", 
-        reply_markup=categories_kb(),
-        parse_mode="Markdown"
-    )
+    await message.answer("Выберите категорию товара:", reply_markup=categories_kb())
 
 
 async def on_main_menu(callback: CallbackQuery, state: FSMContext) -> None:
     await state.clear()
-    text = (
-        "👋 *Главное меню DNK Store*\n\n"
-        "🔥 *Оригинальные кроссовки и одежда по лучшим ценам*\n\n"
-        "✅ 100% оригинал | ✅ Быстрая доставка | ✅ Гарантия качества"
-    )
     await callback.message.edit_text(
-        text, reply_markup=main_menu_kb(), parse_mode="Markdown"
+        "Главное меню. Выберите раздел:", reply_markup=main_menu_kb()
     )
     await callback.answer()
 
@@ -198,56 +183,16 @@ async def on_menu(callback: CallbackQuery, state: FSMContext) -> None:
     if action == "catalog":
         await state.set_state(OrderStates.choosing_category)
         await callback.message.edit_text(
-            "📦 *Выберите категорию товара:*", 
-            reply_markup=categories_kb(),
-            parse_mode="Markdown"
+            "Выберите категорию товара:", reply_markup=categories_kb()
         )
     elif action == "cart":
         await show_cart(callback)
-    elif action == "about":
-        await callback.message.edit_text(
-            "🏢 *О DNK Store*\n\n"
-            "Мы — официальный магазин оригинальной одежды и кроссовок.\n\n"
-            "🔥 *Наши преимущества:*\n"
-            "• Только оригинальная продукция\n"
-            "• Гарантия качества до 30 дней\n"
-            "• Быстрая доставка по всей России\n"
-            "• Скидки постоянным клиентам\n\n"
-            "_Работаем с 2023 года_",
-            reply_markup=main_menu_kb(),
-            parse_mode="Markdown"
-        )
-    elif action == "support":
-        await callback.message.edit_text(
-            "📞 *Поддержка DNK Store*\n\n"
-            "🔹 *Вопросы по заказам:* @manager_dnk\n"
-            "🔹 *WhatsApp:* +7 (999) 123-45-67\n"
-            "🔹 *Время работы:* 10:00 - 21:00 МСК\n\n"
-            "💬 *Быстрые ответы на вопросы:*\n"
-            "• Наличие и размеры\n"
-            "• Доставка и оплата\n"
-            "• Обмен и возврат\n\n"
-            "_Ответим в течение 5 минут!_",
-            reply_markup=main_menu_kb(),
-            parse_mode="Markdown"
-        )
     elif action == "help":
         await callback.message.edit_text(
-            "❓ *Помощь и FAQ*\n\n"
-            "🛍 *Как сделать заказ:*\n"
-            "1. Выберите товар в каталоге\n"
-            "2. Добавьте в корзину\n"
-            "3. Оформите заказ\n\n"
-            "💳 *Способы оплаты:*\n"
-            "• Карта онлайн\n"
-            "• СБП\n"
-            "• При получении\n\n"
-            "🚚 *Доставка:*\n"
-            "• Курьером (1-3 дня)\n"
-            "• Пункт выдачи (1-2 дня)\n\n"
-            "_Остались вопросы? Напишите нам!_",
+            "Если у вас есть вопросы по размерам, наличию или оплате — "
+            "напишите нашему менеджеру: @your_manager_username\n\n"
+            "Или просто продолжайте выбирать товары в каталоге.",
             reply_markup=main_menu_kb(),
-            parse_mode="Markdown"
         )
     await callback.answer()
 
@@ -389,30 +334,20 @@ async def on_cart_actions(callback: CallbackQuery) -> None:
 
 async def cmd_help(message: Message) -> None:
     await message.answer(
-        "🤖 *DNK Store - Помощь*\n\n"
-        "📋 *Доступные команды:*\n"
+        "Я бот-магазин обуви и одежды.\n\n"
+        "Команды:\n"
         "/start — главное меню\n"
-        "/help — это сообщение\n"
-        "/catalog — быстрый доступ к каталогу\n"
-        "/orders — последние заказы (админ)\n\n"
-        "🛍 *Как заказать:*\n"
-        "1. Нажмите 'Открыть магазин'\n"
-        "2. Выберите товары\n"
-        "3. Оформите заказ\n\n"
-        "📞 *Нужна помощь?* @manager_dnk",
-        parse_mode="Markdown"
+        "/help — помощь\n"
+        "/orders — последние заказы (только для админа)\n\n"
+        "Для вопросов по оплате и доставке напишите менеджеру: "
+        "@your_manager_username"
     )
 
 
 async def on_unknown_message(message: Message) -> None:
     await message.answer(
-        "🤔 *Не понимаю команду*\n\n"
-        "Используйте кнопки меню или команды:\n"
-        "/start — главное меню\n"
-        "/help — помощь\n"
-        "/catalog — каталог товаров\n\n"
-        "🛍 *Начать покупки:* /start",
-        parse_mode="Markdown"
+        "Не понимаю это сообщение.\n"
+        "Используйте кнопки или команду /start, чтобы вернуться в главное меню."
     )
 
 
@@ -493,7 +428,6 @@ async def main() -> None:
 
     dp.message.register(cmd_start, CommandStart())
     dp.message.register(cmd_help, Command("help"))
-    dp.message.register(cmd_catalog, Command("catalog"))
     dp.message.register(cmd_orders, Command("orders"))
     dp.message.register(on_webapp_data, F.web_app_data)
     dp.message.register(on_unknown_message)

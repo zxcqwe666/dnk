@@ -17,12 +17,9 @@
             <div class="brand-sub">обувь • одежда</div>
           </div>
         </div>
-        <div class="header-buttons">
-          <button id="profileButton" class="icon-button">👤</button>
-          <button id="cartButton" class="icon-button">
-            🛒 <span id="cartCount" class="badge">0</span>
-          </button>
-        </div>
+        <button id="cartButton" class="icon-button">
+          🛒 <span id="cartCount" class="badge">0</span>
+        </button>
       </header>
 
       <main class="content">
@@ -85,7 +82,6 @@
           <div class="field">
             <label class="field-label" for="city">Город</label>
             <select id="city" class="field-input">
-              <option value="">Выберите город</option>
               <option value="Минск">Минск</option>
               <option value="Брест">Брест</option>
               <option value="Витебск">Витебск</option>
@@ -109,7 +105,6 @@
           <div class="field">
             <label class="field-label" for="delivery">Способ доставки</label>
             <select id="delivery" class="field-input">
-              <option value="">Выберите способ доставки</option>
               <option value="Личная встреча">Личная встреча</option>
               <option value="Европочта">Европочта</option>
               <option value="Белпочта">Белпочта</option>
@@ -137,8 +132,11 @@
           </button>
         </div>
       </div>
+
+      <button id="profileButton" class="fab-profile">👤 Профиль</button>
     </div>
 
     <script src="main.js?v=4"></script>
   </body>
-</html>
+  </html>
+

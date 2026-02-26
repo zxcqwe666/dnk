@@ -381,8 +381,8 @@ function initProfilePanel() {
   const applyToInputs = () => {
     shoeInput.value = profile.shoe_size || "";
     clothingInput.value = profile.clothing_size || "";
-    cityInput.value = profile.city || "";
-    deliveryInput.value = profile.delivery || "";
+    cityInput.value = profile.city || "Минск";
+    deliveryInput.value = profile.delivery || "Личная встреча";
     phoneInput.value = profile.phone || "";
   };
 
@@ -390,6 +390,19 @@ function initProfilePanel() {
     applyToInputs();
     panel.classList.remove("hidden");
   };
+
+  deliveryInput.addEventListener("change", () => {
+    const value = deliveryInput.value;
+    if (value === "Личная встреча") {
+      cityInput.value = "Брест";
+      cityInput.disabled = true;
+    } else {
+      cityInput.disabled = false;
+      if (!profile.city) {
+        cityInput.value = "Минск";
+      }
+    }
+  });
 
   close.onclick = () => {
     panel.classList.add("hidden");
