@@ -3,7 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <title>DNK Mini App</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
     <link rel="stylesheet" href="styles.css?v=5" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
@@ -35,7 +38,7 @@
       <div id="cartPanel" class="cart-panel hidden">
         <div class="cart-header">
           <div class="profile-title">
-            <div class="profile-avatar">🛒</div>
+            <div class="profile-avatar"></div>
             <div>
               <div class="profile-title-main">Корзина</div>
               <div class="profile-title-sub">Проверьте товары перед заказом</div>
@@ -88,7 +91,7 @@
       <div id="qrPanel" class="qr-panel hidden">
         <div class="qr-header">
           <div class="profile-title">
-            <div class="profile-avatar">🔗</div>
+            <div class="profile-avatar"></div>
             <div>
               <div class="profile-title-main">QR бота</div>
               <div class="profile-title-sub">
@@ -188,7 +191,7 @@
           id="tabCatalog"
           class="bottom-nav-item bottom-nav-item--active"
         >
-          🏷 Каталог
+           Каталог
         </button>
         <button id="tabSearch" class="bottom-nav-item">Поиск</button>
         <button id="tabCart" class="bottom-nav-item">
