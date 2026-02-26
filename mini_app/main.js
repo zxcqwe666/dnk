@@ -47,6 +47,29 @@ let profile = {
   phone: "",
 };
 
+const BY_CITIES = [
+  "минск",
+  "брест",
+  "витебск",
+  "гродно",
+  "гомель",
+  "могилёв",
+  "могилев",
+  "барановичи",
+  "бобруйск",
+  "борисов",
+  "лида",
+  "молодечно",
+  "орша",
+  "пинск",
+  "полоцк",
+  "новополоцк",
+  "солигорск",
+  "мозырь",
+];
+
+const DELIVERY_OPTIONS = ["Личная встреча", "Европочта", "Белпочта"];
+
 function formatPrice(value) {
   return value.toLocaleString("ru-RU") + " ₽";
 }
@@ -74,6 +97,27 @@ function saveProfileToStorage() {
   try {
     localStorage.setItem("dnk_profile_v1", JSON.stringify(profile));
   } catch (_) {}
+}
+
+function normalizePhone(raw) {
+  return raw.replace(/[^\d+]/g, "");
+}
+
+function isValidBelarusPhone(raw) {
+  let p = normalizePhone(raw);
+  if (!p) return false;
+  if (p.startsWith("+")) {
+    p = p.slice(1);
+  }
+  if (p.startsWith("80")) {
+    p = "375" + p.slice(2);
+  }
+  if (!p.startsWith("375")) return false;
+  const rest = p.slice(3);
+  if (!/^(25|29|33|44|17)\d{7}$/.test(rest)) {
+    return false;
+  }
+  return true;
 }
 
 function renderCategories(activeId) {
@@ -315,6 +359,25 @@ function initProfilePanel() {
   const deliveryInput = document.getElementById("delivery");
   const phoneInput = document.getElementById("phone");
 
+  const shoeError = document.getElementById("shoeError");
+  const clothingError = document.getElementById("clothingError");
+  const cityError = document.getElementById("cityError");
+  const deliveryError = document.getElementById("deliveryError");
+  const phoneError = document.getElementById("phoneError");
+
+  const clearErrors = () => {
+    [
+      [shoeInput, shoeError],
+      [clothingInput, clothingError],
+      [cityInput, cityError],
+      [deliveryInput, deliveryError],
+      [phoneInput, phoneError],
+    ].forEach(([input, errorEl]) => {
+      input.classList.remove("invalid");
+      errorEl.textContent = "";
+    });
+  };
+
   const applyToInputs = () => {
     shoeInput.value = profile.shoe_size || "";
     clothingInput.value = profile.clothing_size || "";
@@ -333,12 +396,67 @@ function initProfilePanel() {
   };
 
   save.onclick = () => {
+    clearErrors();
+
+    const shoe = shoeInput.value.trim();
+    const clothing = clothingInput.value.trim();
+    const city = cityInput.value.trim();
+    const delivery = deliveryInput.value.trim();
+    const phone = phoneInput.value.trim();
+
+    let hasError = false;
+
+    const shoeNum = parseFloat(shoe.replace(",", "."));
+    if (!shoe || Number.isNaN(shoeNum) || shoeNum < 34 || shoeNum > 50) {
+      shoeInput.classList.add("invalid");
+      shoeError.textContent = "Укажите размер от 34 до 50.";
+      hasError = true;
+    }
+
+    const clothingUpper = clothing.toUpperCase();
+    const clothingOk =
+      /^(XS|S|M|L|XL|XXL|XXXL)$/.test(clothingUpper) ||
+      (/^\d{2}$/.test(clothing) && Number(clothing) >= 40 && Number(clothing) <= 60);
+    if (!clothing || !clothingOk) {
+      clothingInput.classList.add("invalid");
+      clothingError.textContent = "Например: M, L, XL или размер 44–58.";
+      hasError = true;
+    }
+
+    const cityNorm = city.toLowerCase();
+    if (!city || !BY_CITIES.includes(cityNorm)) {
+      cityInput.classList.add("invalid");
+      cityError.textContent = "Выберите один из городов Беларуси из списка.";
+      hasError = true;
+    }
+
+    if (!delivery || !DELIVERY_OPTIONS.includes(delivery)) {
+      deliveryInput.classList.add("invalid");
+      deliveryError.textContent = "Выберите способ доставки из списка.";
+      hasError = true;
+    }
+
+    if (!phone || !isValidBelarusPhone(phone)) {
+      phoneInput.classList.add("invalid");
+      phoneError.textContent = "Телефон в формате Беларуси, например +375 29 123 45 67.";
+      hasError = true;
+    }
+
+    if (hasError) {
+      if (window.Telegram?.WebApp) {
+        window.Telegram.WebApp.showAlert("Проверьте данные профиля и исправьте ошибки.");
+      } else {
+        alert("Проверьте данные профиля и исправьте ошибки.");
+      }
+      return;
+    }
+
     profile = {
-      shoe_size: shoeInput.value.trim(),
-      clothing_size: clothingInput.value.trim(),
-      city: cityInput.value.trim(),
-      delivery: deliveryInput.value.trim(),
-      phone: phoneInput.value.trim(),
+      shoe_size: shoe,
+      clothing_size: clothing,
+      city,
+      delivery,
+      phone,
     };
     saveProfileToStorage();
 

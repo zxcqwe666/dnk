@@ -68,6 +68,7 @@
           <div class="field">
             <label class="field-label" for="shoeSize">Размер обуви</label>
             <input id="shoeSize" class="field-input" placeholder="Например 42" />
+            <div id="shoeError" class="field-error"></div>
           </div>
           <div class="field">
             <label class="field-label" for="clothingSize">Размер одежды</label>
@@ -76,27 +77,51 @@
               class="field-input"
               placeholder="S / M / L или RU 46"
             />
+            <div id="clothingError" class="field-error"></div>
           </div>
           <div class="field">
             <label class="field-label" for="city">Город</label>
-            <input id="city" class="field-input" placeholder="Город доставки" />
+            <select id="city" class="field-input">
+              <option value="">Выберите город</option>
+              <option value="Минск">Минск</option>
+              <option value="Брест">Брест</option>
+              <option value="Витебск">Витебск</option>
+              <option value="Гродно">Гродно</option>
+              <option value="Гомель">Гомель</option>
+              <option value="Могилёв">Могилёв</option>
+              <option value="Барановичи">Барановичи</option>
+              <option value="Бобруйск">Бобруйск</option>
+              <option value="Борисов">Борисов</option>
+              <option value="Лида">Лида</option>
+              <option value="Молодечно">Молодечно</option>
+              <option value="Орша">Орша</option>
+              <option value="Пинск">Пинск</option>
+              <option value="Полоцк">Полоцк</option>
+              <option value="Новополоцк">Новополоцк</option>
+              <option value="Солигорск">Солигорск</option>
+              <option value="Мозырь">Мозырь</option>
+            </select>
+            <div id="cityError" class="field-error"></div>
           </div>
           <div class="field">
             <label class="field-label" for="delivery">Способ доставки</label>
-            <input
-              id="delivery"
-              class="field-input"
-              placeholder="СДЭК / Почта / Курьер"
-            />
+            <select id="delivery" class="field-input">
+              <option value="">Выберите способ доставки</option>
+              <option value="Личная встреча">Личная встреча</option>
+              <option value="Европочта">Европочта</option>
+              <option value="Белпочта">Белпочта</option>
+            </select>
+            <div id="deliveryError" class="field-error"></div>
           </div>
           <div class="field">
             <label class="field-label" for="phone">Телефон</label>
             <input
               id="phone"
               class="field-input"
-              placeholder="+7 ..."
+              placeholder="+375 29 123 45 67"
               inputmode="tel"
             />
+            <div id="phoneError" class="field-error"></div>
           </div>
           <p class="field-hint">
             Данные нужны, чтобы менеджер быстрее оформил заказ. Они хранятся в
