@@ -455,6 +455,39 @@ body {
   padding-right: 4px;
 }
 
+.qr-panel {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at top, #151624, #050509);
+  padding: 16px 14px 70px;
+}
+
+.qr-panel.hidden {
+  display: none;
+}
+
+.qr-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.qr-body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: calc(100vh - 160px);
+}
+
+.qr-image {
+  width: 220px;
+  height: 220px;
+  border-radius: 24px;
+  background: #fff;
+  padding: 12px;
+}
+
 .bottom-nav {
   position: fixed;
   left: 0;

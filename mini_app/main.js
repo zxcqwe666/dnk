@@ -1,3 +1,5 @@
+const BOT_URL = "https://t.me/dnkstock_bot";
+
 const CATALOG = {
   sneakers: [
     {
@@ -82,6 +84,31 @@ function initTelegram() {
   tg.expand();
   tg.setHeaderColor("#0f1115");
   tg.setBackgroundColor("#050509");
+}
+
+function initQrPanel() {
+  const btn = document.getElementById("qrButton");
+  const panel = document.getElementById("qrPanel");
+  const close = document.getElementById("closeQr");
+  const img = document.getElementById("qrImage");
+
+  if (img) {
+    const url = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(
+      BOT_URL
+    )}`;
+    img.src = url;
+  }
+
+  if (btn) {
+    btn.onclick = () => {
+      panel.classList.remove("hidden");
+    };
+  }
+  if (close) {
+    close.onclick = () => {
+      panel.classList.add("hidden");
+    };
+  }
 }
 
 function loadProfileFromStorage() {
@@ -622,6 +649,7 @@ function initProfilePanel() {
 
 document.addEventListener("DOMContentLoaded", () => {
   initTelegram();
+  initQrPanel();
   loadProfileFromStorage();
   const initialCategory = "sneakers";
   renderCategories(initialCategory);
