@@ -40,7 +40,7 @@ const CATEGORIES = {
   clothes: "Одежда",
 };
 
-const cart = {};
+let cart = {};
 let profile = {
   shoe_size: "",
   clothing_size: "",
