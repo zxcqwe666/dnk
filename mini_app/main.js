@@ -376,8 +376,20 @@ function initCartPanel() {
         message: text,
         buttons: [{ id: "ok", type: "default", text: "OK" }],
       });
+      cart = {};
+      updateCartBadge();
+      renderCart();
+      if (typeof window.setActiveTab === "function") {
+        window.setActiveTab("catalog");
+      } else {
+        panel.classList.add("hidden");
+      }
     } else {
       alert(text);
+      cart = {};
+      updateCartBadge();
+      renderCart();
+      panel.classList.add("hidden");
     }
   };
 }
