@@ -348,7 +348,8 @@ function initCartPanel() {
 }
 
 function initProfilePanel() {
-  const btn = document.getElementById("profileButton");
+  const tabProfile = document.getElementById("tabProfile");
+  const tabCatalog = document.getElementById("tabCatalog");
   const panel = document.getElementById("profilePanel");
   const close = document.getElementById("closeProfile");
   const save = document.getElementById("saveProfileButton");
@@ -364,6 +365,18 @@ function initProfilePanel() {
   const cityError = document.getElementById("cityError");
   const deliveryError = document.getElementById("deliveryError");
   const phoneError = document.getElementById("phoneError");
+
+  const setActiveTab = (tab) => {
+    if (tab === "catalog") {
+      tabCatalog.classList.add("bottom-nav-item--active");
+      tabProfile.classList.remove("bottom-nav-item--active");
+      panel.classList.add("hidden");
+    } else if (tab === "profile") {
+      tabProfile.classList.add("bottom-nav-item--active");
+      tabCatalog.classList.remove("bottom-nav-item--active");
+      panel.classList.remove("hidden");
+    }
+  };
 
   const clearErrors = () => {
     [
@@ -386,9 +399,13 @@ function initProfilePanel() {
     phoneInput.value = profile.phone || "";
   };
 
-  btn.onclick = () => {
+  tabProfile.onclick = () => {
     applyToInputs();
-    panel.classList.remove("hidden");
+    setActiveTab("profile");
+  };
+
+  tabCatalog.onclick = () => {
+    setActiveTab("catalog");
   };
 
   deliveryInput.addEventListener("change", () => {
@@ -405,7 +422,7 @@ function initProfilePanel() {
   });
 
   close.onclick = () => {
-    panel.classList.add("hidden");
+    setActiveTab("catalog");
   };
 
   save.onclick = () => {
