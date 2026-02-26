@@ -320,10 +320,7 @@ body {
   position: fixed;
   inset: 0;
   background: radial-gradient(circle at top, #1b1528, #050509);
-  padding: 20px 16px 80px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  padding: 16px 14px 70px;
 }
 
 .profile-panel.hidden {
@@ -337,18 +334,8 @@ body {
   margin-bottom: 10px;
 }
 
-.profile-card {
-  width: 100%;
-  max-width: 480px;
-  border-radius: 22px;
-  background: radial-gradient(circle at top left, rgba(255, 79, 216, 0.18), #11121a);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.85);
-  padding: 14px 14px 16px;
-}
-
 .profile-body {
-  max-height: 260px;
+  max-height: calc(100vh - 130px);
   overflow-y: auto;
   padding-right: 4px;
   margin-top: 6px;
@@ -367,12 +354,12 @@ body {
 
 .field-input {
   width: 100%;
-  padding: 8px 10px;
+  padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid var(--border-subtle);
   background: rgba(15, 16, 24, 0.96);
   color: var(--text);
-  font-size: 13px;
+  font-size: 16px;
 }
 
 .field-input:focus {
