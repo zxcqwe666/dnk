@@ -17,9 +17,7 @@
             <div class="brand-sub">обувь • одежда</div>
           </div>
         </div>
-        <button id="cartButton" class="icon-button">
-          🛒 <span id="cartCount" class="badge">0</span>
-        </button>
+        <button id="topInfo" class="icon-button">DNK</button>
       </header>
 
       <main class="content" id="catalogView">
@@ -36,10 +34,21 @@
 
       <div id="cartPanel" class="cart-panel hidden">
         <div class="cart-header">
-          <h2>Корзина</h2>
+          <div class="profile-title">
+            <div class="profile-avatar">🛒</div>
+            <div>
+              <div class="profile-title-main">Корзина</div>
+              <div class="profile-title-sub">Проверьте товары перед заказом</div>
+            </div>
+          </div>
           <button id="closeCart" class="icon-button">✕</button>
         </div>
-        <div id="cartItems" class="cart-items"></div>
+        <div class="cart-body">
+          <div id="cartEmpty" class="empty-state hidden">
+            В корзине пока пусто. Добавьте товары из каталога или поиска.
+          </div>
+          <div id="cartItems" class="cart-items"></div>
+        </div>
         <div class="cart-footer">
           <div class="cart-total">
             <span>Итого:</span>
@@ -162,9 +171,12 @@
           id="tabCatalog"
           class="bottom-nav-item bottom-nav-item--active"
         >
-          Каталог
+          🏷 Каталог
         </button>
         <button id="tabSearch" class="bottom-nav-item">Поиск</button>
+        <button id="tabCart" class="bottom-nav-item">
+          🛒 Корзина <span id="cartBadge" class="badge badge--nav">0</span>
+        </button>
         <button id="tabProfile" class="bottom-nav-item">Профиль</button>
       </nav>
     </div>

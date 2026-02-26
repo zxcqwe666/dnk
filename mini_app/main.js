@@ -192,19 +192,27 @@ function renderProducts(categoryId) {
 
 function updateCartBadge() {
   const count = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
-  const badge = document.getElementById("cartCount");
-  badge.textContent = count;
+  const badge = document.getElementById("cartBadge");
+  if (badge) badge.textContent = count;
 }
 
 function renderCart() {
   const panel = document.getElementById("cartPanel");
   const itemsRoot = document.getElementById("cartItems");
   const totalEl = document.getElementById("cartTotal");
+  const emptyEl = document.getElementById("cartEmpty");
 
   itemsRoot.innerHTML = "";
 
   let total = 0;
-  Object.entries(cart).forEach(([id, qty]) => {
+  const entries = Object.entries(cart);
+  if (entries.length === 0) {
+    if (emptyEl) emptyEl.classList.remove("hidden");
+    totalEl.textContent = formatPrice(0);
+    return;
+  }
+  if (emptyEl) emptyEl.classList.add("hidden");
+  entries.forEach(([id, qty]) => {
     let product =
       CATALOG.sneakers.find((p) => p.id === id) ||
       CATALOG.clothes.find((p) => p.id === id);
@@ -243,11 +251,7 @@ function renderCart() {
         delete cart[id];
       }
       updateCartBadge();
-      if (Object.keys(cart).length === 0) {
-        panel.classList.add("hidden");
-      } else {
-        renderCart();
-      }
+      renderCart();
     };
 
     const qtyLabel = document.createElement("span");
@@ -275,27 +279,31 @@ function renderCart() {
   totalEl.textContent = formatPrice(total);
 }
 
+window.renderCart = renderCart;
+
 function initCartPanel() {
-  const cartButton = document.getElementById("cartButton");
+  const tabCart = document.getElementById("tabCart");
   const panel = document.getElementById("cartPanel");
   const close = document.getElementById("closeCart");
   const checkout = document.getElementById("checkoutButton");
 
-  cartButton.onclick = () => {
-    if (Object.keys(cart).length === 0) {
-      if (window.Telegram?.WebApp) {
-        window.Telegram.WebApp.showAlert("Корзина пуста. Добавьте товары.");
+  if (tabCart) {
+    tabCart.onclick = () => {
+      if (typeof window.setActiveTab === "function") {
+        window.setActiveTab("cart");
       } else {
-        alert("Корзина пуста. Добавьте товары.");
+        renderCart();
+        panel.classList.remove("hidden");
       }
-      return;
-    }
-    renderCart();
-    panel.classList.remove("hidden");
-  };
+    };
+  }
 
   close.onclick = () => {
-    panel.classList.add("hidden");
+    if (typeof window.setActiveTab === "function") {
+      window.setActiveTab("catalog");
+    } else {
+      panel.classList.add("hidden");
+    }
   };
 
   checkout.onclick = () => {
@@ -351,9 +359,11 @@ function initProfilePanel() {
   const tabProfile = document.getElementById("tabProfile");
   const tabCatalog = document.getElementById("tabCatalog");
   const tabSearch = document.getElementById("tabSearch");
+  const tabCart = document.getElementById("tabCart");
 
   const panel = document.getElementById("profilePanel");
   const searchPanel = document.getElementById("searchPanel");
+  const cartPanel = document.getElementById("cartPanel");
 
   const close = document.getElementById("closeProfile");
   const save = document.getElementById("saveProfileButton");
@@ -375,22 +385,31 @@ function initProfilePanel() {
   const phoneError = document.getElementById("phoneError");
 
   const setActiveTab = (tab) => {
-    [tabCatalog, tabSearch, tabProfile].forEach((btn) =>
-      btn.classList.remove("bottom-nav-item--active")
-    );
+    [tabCatalog, tabSearch, tabCart, tabProfile].forEach((btn) => {
+      if (btn) btn.classList.remove("bottom-nav-item--active");
+    });
     panel.classList.add("hidden");
     searchPanel.classList.add("hidden");
+    cartPanel.classList.add("hidden");
 
     if (tab === "catalog") {
       tabCatalog.classList.add("bottom-nav-item--active");
     } else if (tab === "search") {
       tabSearch.classList.add("bottom-nav-item--active");
       searchPanel.classList.remove("hidden");
+    } else if (tab === "cart") {
+      if (tabCart) tabCart.classList.add("bottom-nav-item--active");
+      cartPanel.classList.remove("hidden");
+      if (typeof window.renderCart === "function") {
+        window.renderCart();
+      }
     } else if (tab === "profile") {
       tabProfile.classList.add("bottom-nav-item--active");
       panel.classList.remove("hidden");
     }
   };
+
+  window.setActiveTab = setActiveTab;
 
   const clearErrors = () => {
     [
@@ -421,6 +440,12 @@ function initProfilePanel() {
   tabCatalog.onclick = () => {
     setActiveTab("catalog");
   };
+
+  if (tabCart) {
+    tabCart.onclick = () => {
+      setActiveTab("cart");
+    };
+  }
 
   const allProducts = [...CATALOG.sneakers, ...CATALOG.clothes];
 
