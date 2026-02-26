@@ -2,9 +2,9 @@ const CATALOG = {
   sneakers: [
     {
       id: "snk1",
-      name: "Nike Air Max 270",
-      price: 15990,
-      desc: "Оригинальные Nike Air Max 270. Размеры 36-45.",
+      name: "Rick Owens Performa",
+      price: 500,
+      desc: "Размеры 36-45.",
       emoji: "👟",
     },
     {
