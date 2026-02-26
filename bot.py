@@ -2,17 +2,26 @@ import asyncio
 import logging
 import os
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Any, Dict, List
 
+from aiogram.client.default import DefaultBotProperties
 from aiogram import Bot, Dispatcher, F
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart, Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.types import CallbackQuery, InlineKeyboardMarkup, Message, WebAppInfo
+from aiogram.types import (
+    CallbackQuery,
+    InlineKeyboardMarkup,
+    Message,
+    WebAppData,
+    WebAppInfo,
+)
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from dotenv import load_dotenv
+
+from db import fetch_last_orders, init_db, save_order, save_user_profile
 
 
 load_dotenv()
@@ -85,14 +94,13 @@ def format_price(amount: int) -> str:
 
 def main_menu_kb() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
-    kb.button(text="Каталог 👟", callback_data="menu:catalog")
-    kb.button(text="Корзина 🛒", callback_data="menu:cart")
-    kb.button(text="Помощь ❓", callback_data="menu:help")
     if WEBAPP_URL:
         kb.button(
-            text="Открыть Mini App 🦄",
+            text="Открыть магазин 🦄",
             web_app=WebAppInfo(url=WEBAPP_URL),
         )
+    else:
+        kb.button(text="Mini App недоступен", callback_data="menu:noop")
     kb.adjust(1)
     return kb.as_markup()
 
@@ -152,8 +160,7 @@ async def cmd_start(message: Message, state: FSMContext) -> None:
     text = (
         "Привет! 👋\n\n"
         "Я бот-магазин оригинальных кроссовок и одежды.\n"
-        "Здесь вы можете заказать топовые модели по лучшим ценам.\n\n"
-        "Выберите раздел:"
+        "Чтобы оформить заказ, открой мини‑приложение:"
     )
     await message.answer(text, reply_markup=main_menu_kb())
 
@@ -330,8 +337,8 @@ async def cmd_help(message: Message) -> None:
         "Я бот-магазин обуви и одежды.\n\n"
         "Команды:\n"
         "/start — главное меню\n"
-        "/catalog — открыть каталог\n"
-        "/help — помощь\n\n"
+        "/help — помощь\n"
+        "/orders — последние заказы (только для админа)\n\n"
         "Для вопросов по оплате и доставке напишите менеджеру: "
         "@your_manager_username"
     )
@@ -344,14 +351,85 @@ async def on_unknown_message(message: Message) -> None:
     )
 
 
+async def on_webapp_data(message: Message) -> None:
+    if not message.web_app_data:
+        return
+
+    try:
+        payload: dict[str, Any] = json.loads(message.web_app_data.data)
+    except Exception:
+        await message.answer("Не удалось прочитать данные заказа.")
+        return
+
+    kind = payload.get("type")
+    user = message.from_user
+
+    if kind == "order":
+        order_id = await save_order(
+            user_id=user.id,
+            username=user.username,
+            full_name=user.full_name,
+            payload=payload,
+        )
+
+        total = int(payload.get("total", 0))
+        await message.answer(
+            f"Заказ №{order_id} сохранён.\n"
+            f"Сумма: {format_price(total)}\n\n"
+            "Менеджер скоро с вами свяжется."
+        )
+        return
+
+    if kind == "profile":
+        profile = payload.get("profile") or {}
+        await save_user_profile(
+            user_id=user.id,
+            username=user.username,
+            full_name=user.full_name,
+            profile=profile,
+        )
+        await message.answer("Профиль обновлён ✅")
+        return
+
+    await message.answer("Получены неподдерживаемые данные.")
+
+
+ADMIN_ID = int(os.getenv("ADMIN_ID", "0"))  # опционально, Telegram ID админа
+
+
+async def cmd_orders(message: Message) -> None:
+    if ADMIN_ID and message.from_user.id != ADMIN_ID:
+        await message.answer("Команда доступна только администратору.")
+        return
+
+    orders = await fetch_last_orders(limit=10)
+    if not orders:
+        await message.answer("Заказов пока нет.")
+        return
+
+    lines: list[str] = ["Последние заказы:\n"]
+    for o in orders:
+        user = o.get("username") or o.get("full_name") or o["user_id"]
+        lines.append(
+            f"#{o['id']} — {format_price(o['total'])} — {user} — {o['created_at']}"
+        )
+
+    await message.answer("\n".join(lines))
+
+
 async def main() -> None:
-    bot = Bot(token=API_TOKEN, parse_mode=ParseMode.HTML)
+    bot = Bot(
+        token=API_TOKEN,
+        default=DefaultBotProperties(parse_mode=ParseMode.HTML),
+    )
     storage = MemoryStorage()
+    await init_db()
     dp = Dispatcher(storage=storage)
 
     dp.message.register(cmd_start, CommandStart())
     dp.message.register(cmd_help, Command("help"))
-    dp.message.register(cmd_catalog, Command("catalog"))
+    dp.message.register(cmd_orders, Command("orders"))
+    dp.message.register(on_webapp_data, F.web_app_data)
     dp.message.register(on_unknown_message)
 
     dp.callback_query.register(on_main_menu, F.data == "back:main")

@@ -39,6 +39,13 @@ const CATEGORIES = {
 };
 
 const cart = {};
+let profile = {
+  shoe_size: "",
+  clothing_size: "",
+  city: "",
+  delivery: "",
+  phone: "",
+};
 
 function formatPrice(value) {
   return value.toLocaleString("ru-RU") + " ₽";
@@ -52,6 +59,21 @@ function initTelegram() {
   tg.expand();
   tg.setHeaderColor("#0f1115");
   tg.setBackgroundColor("#050509");
+}
+
+function loadProfileFromStorage() {
+  try {
+    const raw = localStorage.getItem("dnk_profile_v1");
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    profile = { ...profile, ...data };
+  } catch (_) {}
+}
+
+function saveProfileToStorage() {
+  try {
+    localStorage.setItem("dnk_profile_v1", JSON.stringify(profile));
+  } catch (_) {}
 }
 
 function renderCategories(activeId) {
@@ -267,6 +289,7 @@ function initCartPanel() {
           type: "order",
           items: cart,
           total,
+          profile,
         })
       );
       window.Telegram.WebApp.showPopup({
@@ -280,12 +303,71 @@ function initCartPanel() {
   };
 }
 
+function initProfilePanel() {
+  const btn = document.getElementById("profileButton");
+  const panel = document.getElementById("profilePanel");
+  const close = document.getElementById("closeProfile");
+  const save = document.getElementById("saveProfileButton");
+
+  const shoeInput = document.getElementById("shoeSize");
+  const clothingInput = document.getElementById("clothingSize");
+  const cityInput = document.getElementById("city");
+  const deliveryInput = document.getElementById("delivery");
+  const phoneInput = document.getElementById("phone");
+
+  const applyToInputs = () => {
+    shoeInput.value = profile.shoe_size || "";
+    clothingInput.value = profile.clothing_size || "";
+    cityInput.value = profile.city || "";
+    deliveryInput.value = profile.delivery || "";
+    phoneInput.value = profile.phone || "";
+  };
+
+  btn.onclick = () => {
+    applyToInputs();
+    panel.classList.remove("hidden");
+  };
+
+  close.onclick = () => {
+    panel.classList.add("hidden");
+  };
+
+  save.onclick = () => {
+    profile = {
+      shoe_size: shoeInput.value.trim(),
+      clothing_size: clothingInput.value.trim(),
+      city: cityInput.value.trim(),
+      delivery: deliveryInput.value.trim(),
+      phone: phoneInput.value.trim(),
+    };
+    saveProfileToStorage();
+
+    if (window.Telegram?.WebApp) {
+      window.Telegram.WebApp.sendData(
+        JSON.stringify({
+          type: "profile",
+          profile,
+        })
+      );
+      window.Telegram.WebApp.showPopup({
+        title: "Профиль сохранён",
+        message: "Мы будем подставлять эти данные в заказы.",
+        buttons: [{ id: "ok", type: "default", text: "OK" }],
+      });
+    }
+
+    panel.classList.add("hidden");
+  };
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   initTelegram();
+  loadProfileFromStorage();
   const initialCategory = "sneakers";
   renderCategories(initialCategory);
   renderProducts(initialCategory);
   updateCartBadge();
   initCartPanel();
+  initProfilePanel();
 });
 
