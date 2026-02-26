@@ -415,6 +415,30 @@ body {
   color: var(--text-muted);
 }
 
+.search-panel {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at top, #151624, #050509);
+  padding: 16px 14px 70px;
+}
+
+.search-panel.hidden {
+  display: none;
+}
+
+.search-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.search-body {
+  max-height: calc(100vh - 130px);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
 .bottom-nav {
   position: fixed;
   left: 0;

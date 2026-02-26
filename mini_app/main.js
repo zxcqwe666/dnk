@@ -350,9 +350,17 @@ function initCartPanel() {
 function initProfilePanel() {
   const tabProfile = document.getElementById("tabProfile");
   const tabCatalog = document.getElementById("tabCatalog");
+  const tabSearch = document.getElementById("tabSearch");
+
   const panel = document.getElementById("profilePanel");
+  const searchPanel = document.getElementById("searchPanel");
+
   const close = document.getElementById("closeProfile");
   const save = document.getElementById("saveProfileButton");
+
+  const closeSearch = document.getElementById("closeSearch");
+  const searchInput = document.getElementById("searchQuery");
+  const searchResults = document.getElementById("searchResults");
 
   const shoeInput = document.getElementById("shoeSize");
   const clothingInput = document.getElementById("clothingSize");
@@ -367,13 +375,19 @@ function initProfilePanel() {
   const phoneError = document.getElementById("phoneError");
 
   const setActiveTab = (tab) => {
+    [tabCatalog, tabSearch, tabProfile].forEach((btn) =>
+      btn.classList.remove("bottom-nav-item--active")
+    );
+    panel.classList.add("hidden");
+    searchPanel.classList.add("hidden");
+
     if (tab === "catalog") {
       tabCatalog.classList.add("bottom-nav-item--active");
-      tabProfile.classList.remove("bottom-nav-item--active");
-      panel.classList.add("hidden");
+    } else if (tab === "search") {
+      tabSearch.classList.add("bottom-nav-item--active");
+      searchPanel.classList.remove("hidden");
     } else if (tab === "profile") {
       tabProfile.classList.add("bottom-nav-item--active");
-      tabCatalog.classList.remove("bottom-nav-item--active");
       panel.classList.remove("hidden");
     }
   };
@@ -408,6 +422,71 @@ function initProfilePanel() {
     setActiveTab("catalog");
   };
 
+  const allProducts = [...CATALOG.sneakers, ...CATALOG.clothes];
+
+  const renderSearchResults = (query) => {
+    const q = query.trim().toLowerCase();
+    searchResults.innerHTML = "";
+    const filtered = q
+      ? allProducts.filter(
+          (p) =>
+            p.name.toLowerCase().includes(q) ||
+            p.desc.toLowerCase().includes(q)
+        )
+      : allProducts;
+
+    filtered.forEach((p) => {
+      const card = document.createElement("div");
+      card.className = "product-card";
+
+      const img = document.createElement("div");
+      img.className = "product-image";
+      img.textContent = p.emoji || "⭐";
+
+      const name = document.createElement("div");
+      name.className = "product-name";
+      name.textContent = p.name;
+
+      const desc = document.createElement("div");
+      desc.className = "product-desc";
+      desc.textContent = p.desc;
+
+      const footer = document.createElement("div");
+      footer.className = "product-footer";
+
+      const price = document.createElement("div");
+      price.className = "price";
+      price.textContent = formatPrice(p.price);
+
+      const button = document.createElement("button");
+      button.className = "secondary-button";
+      button.textContent = "В корзину";
+      button.onclick = () => {
+        cart[p.id] = (cart[p.id] || 0) + 1;
+        updateCartBadge();
+        if (window.Telegram?.WebApp) {
+          window.Telegram.WebApp.HapticFeedback.impactOccurred("medium");
+        }
+      };
+
+      footer.appendChild(price);
+      footer.appendChild(button);
+
+      card.appendChild(img);
+      card.appendChild(name);
+      card.appendChild(desc);
+      card.appendChild(footer);
+
+      searchResults.appendChild(card);
+    });
+  };
+
+  tabSearch.onclick = () => {
+    setActiveTab("search");
+    renderSearchResults(searchInput.value || "");
+    searchInput.focus();
+  };
+
   deliveryInput.addEventListener("change", () => {
     const value = deliveryInput.value;
     if (value === "Личная встреча") {
@@ -424,6 +503,14 @@ function initProfilePanel() {
   close.onclick = () => {
     setActiveTab("catalog");
   };
+
+  closeSearch.onclick = () => {
+    setActiveTab("catalog");
+  };
+
+  searchInput.addEventListener("input", (e) => {
+    renderSearchResults(e.target.value);
+  });
 
   save.onclick = () => {
     clearErrors();

@@ -51,6 +51,31 @@
         </div>
       </div>
 
+      <div id="searchPanel" class="search-panel hidden">
+        <div class="search-header">
+          <div class="profile-title">
+            <div class="profile-avatar">🔍</div>
+            <div>
+              <div class="profile-title-main">Поиск</div>
+              <div class="profile-title-sub">
+                Найдите нужную модель по названию или описанию
+              </div>
+            </div>
+          </div>
+          <button id="closeSearch" class="icon-button">✕</button>
+        </div>
+        <div class="search-body">
+          <div class="field">
+            <input
+              id="searchQuery"
+              class="field-input"
+              placeholder="Введите название или бренд"
+            />
+          </div>
+          <div id="searchResults" class="product-grid"></div>
+        </div>
+      </div>
+
       <div id="profilePanel" class="profile-panel hidden">
         <div class="profile-header">
           <div class="profile-title">
@@ -139,6 +164,7 @@
         >
           Каталог
         </button>
+        <button id="tabSearch" class="bottom-nav-item">Поиск</button>
         <button id="tabProfile" class="bottom-nav-item">Профиль</button>
       </nav>
     </div>
