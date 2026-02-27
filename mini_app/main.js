@@ -547,13 +547,17 @@ function initProfilePanel() {
       profileSummary.classList.add("hidden");
       summaryBackButton.classList.add("hidden");
       profileForm.classList.remove("hidden");
+      profileForm.classList.add("dropdown-open");
       profileFooter.classList.remove("hidden");
+      profileFooter.classList.add("dropdown-open");
     } else {
       profileMenu.classList.remove("hidden");
       profileSummary.classList.add("hidden");
       summaryBackButton.classList.add("hidden");
       profileForm.classList.add("hidden");
+      profileForm.classList.remove("dropdown-open");
       profileFooter.classList.add("hidden");
+      profileFooter.classList.remove("dropdown-open");
     }
   };
 
@@ -563,7 +567,9 @@ function initProfilePanel() {
     profileSummary.classList.remove("hidden");
     summaryBackButton.classList.remove("hidden");
     profileForm.classList.add("hidden");
+    profileForm.classList.remove("dropdown-open");
     profileFooter.classList.add("hidden");
+    profileFooter.classList.remove("dropdown-open");
   };
 
   const showProfileMenu = () => {
@@ -571,7 +577,9 @@ function initProfilePanel() {
     profileSummary.classList.add("hidden");
     summaryBackButton.classList.add("hidden");
     profileForm.classList.add("hidden");
+    profileForm.classList.remove("dropdown-open");
     profileFooter.classList.add("hidden");
+    profileFooter.classList.remove("dropdown-open");
   };
 
   window.openProfileForm = () => {
