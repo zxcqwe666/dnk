@@ -430,8 +430,7 @@ async def on_webapp_data(message: Message) -> None:
         
         warning = ""
         if missing_fields:
-            warning = f"⚠️ Внимание: не заполнены {', '.join(missing_fields)}.
-"
+            warning = f"⚠️ Внимание: не заполнены {', '.join(missing_fields)}. "
         
         # Сохранение заказа
         order_id = await save_order(
