@@ -379,62 +379,9 @@ async def on_webapp_data(message: Message) -> None:
     user = message.from_user
 
     if kind == "order":
-        # Проверка структуры заказа
-        if not isinstance(payload.get("items"), dict):
-            await message.answer("❌ Некорректная структура заказа. Обновите страницу и попробуйте снова.")
+        if not payload.get("items"):
+            await message.answer("Заказ пустой. Добавьте товары и повторите.")
             return
-        
-        items: dict[str, int] = payload.get("items", {})
-        if not items:
-            await message.answer("🛒 Заказ пустой. Добавьте товары в корзину и повторите.")
-            return
-        
-        # Проверка товаров и расчет суммы
-        calculated_total = 0
-        invalid_items = []
-        
-        for product_id, qty in items.items():
-            if not isinstance(qty, int) or qty <= 0:
-                await message.answer(f"❌ Некорректное количество для товара {product_id}")
-                return
-            
-            product = find_product_by_id(product_id)
-            if not product:
-                invalid_items.append(product_id)
-                continue
-            
-            calculated_total += product.price * qty
-        
-        if invalid_items:
-            await message.answer(f"❌ Некоторые товары недоступны: {', '.join(invalid_items)}")
-            return
-        
-        # Проверка суммы
-        order_total = int(payload.get("total", 0))
-        if order_total <= 0:
-            await message.answer("❌ Сумма заказа должна быть больше 0")
-            return
-        
-        if order_total != calculated_total:
-            await message.answer(f"❌ Ошибка расчета суммы. Ожидалось: {format_price(calculated_total)}, получено: {format_price(order_total)}")
-            return
-        
-        # Проверка профиля (опционально, но рекомендуется)
-        profile = payload.get("profile", {})
-        missing_fields = []
-        if not profile.get("city"):
-            missing_fields.append("город")
-        if not profile.get("phone"):
-            missing_fields.append("телефон")
-        
-        if missing_fields:
-            await message.answer(
-                f"⚠️ Для оформления заказа рекомендуется заполнить: {', '.join(missing_fields)}.\n"
-                f"Перейдите в профиль и добавьте недостающую информацию."
-            )
-            return
-        
-        # Сохранение заказа
         order_id = await save_order(
             user_id=user.id,
             username=user.username,
@@ -444,10 +391,9 @@ async def on_webapp_data(message: Message) -> None:
 
         total = int(payload.get("total", 0))
         await message.answer(
-            f"✅ Заказ №{order_id} успешно оформлен!\n"
-            f"💰 Сумма: {format_price(total)}\n"
-            f"📦 Товаров: {sum(items.values())} шт.\n\n"
-            "Менеджер скоро свяжется с вами для подтверждения."
+            f"Заказ №{order_id} сохранён.\n"
+            f"Сумма: {format_price(total)}\n\n"
+            "Менеджер скоро с вами свяжется."
         )
         return
 
