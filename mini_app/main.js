@@ -4,9 +4,9 @@ const CATALOG = {
   sneakers: [
     {
       id: "snk1",
-      name: "Rick Owens Performa",
-      price: 500,
-      desc: "Размеры 36-45.",
+      name: "Nike Air Max 270",
+      price: 15990,
+      desc: "Оригинальные Nike Air Max 270. Размеры 36-45.",
       emoji: "👟",
     },
     {
@@ -452,12 +452,16 @@ function initProfilePanel() {
 
   const close = document.getElementById("closeProfile");
   const save = document.getElementById("saveProfileButton");
-  const myOrders = document.getElementById("myOrdersButton");
+  const personalDataButton = document.getElementById("personalDataButton");
+  const myOrdersButton = document.getElementById("myOrdersButton");
   const editProfile = document.getElementById("editProfileButton");
-  const backToSummary = document.getElementById("backToSummaryButton");
+  const backToMenuButton = document.getElementById("backToMenuButton");
+  const backToMenuFromSummary = document.getElementById("backToMenuFromSummary");
   const profileSummary = document.getElementById("profileSummary");
+  const profileMenu = document.getElementById("profileMenu");
   const profileForm = document.getElementById("profileForm");
   const profileFooter = document.getElementById("profileFooter");
+  const summaryBackButton = document.getElementById("summaryBackButton");
 
   const closeSearch = document.getElementById("closeSearch");
   const searchInput = document.getElementById("searchQuery");
@@ -539,14 +543,35 @@ function initProfilePanel() {
 
   const toggleProfileForm = (showForm) => {
     if (showForm) {
+      profileMenu.classList.add("hidden");
       profileSummary.classList.add("hidden");
+      summaryBackButton.classList.add("hidden");
       profileForm.classList.remove("hidden");
       profileFooter.classList.remove("hidden");
     } else {
-      profileSummary.classList.remove("hidden");
+      profileMenu.classList.remove("hidden");
+      profileSummary.classList.add("hidden");
+      summaryBackButton.classList.add("hidden");
       profileForm.classList.add("hidden");
       profileFooter.classList.add("hidden");
     }
+  };
+
+  const showProfileSummary = () => {
+    updateSummary();
+    profileMenu.classList.add("hidden");
+    profileSummary.classList.remove("hidden");
+    summaryBackButton.classList.remove("hidden");
+    profileForm.classList.add("hidden");
+    profileFooter.classList.add("hidden");
+  };
+
+  const showProfileMenu = () => {
+    profileMenu.classList.remove("hidden");
+    profileSummary.classList.add("hidden");
+    summaryBackButton.classList.add("hidden");
+    profileForm.classList.add("hidden");
+    profileFooter.classList.add("hidden");
   };
 
   window.openProfileForm = () => {
@@ -555,9 +580,7 @@ function initProfilePanel() {
   };
 
   tabProfile.onclick = () => {
-    applyToInputs();
-    updateSummary();
-    toggleProfileForm(false);
+    showProfileMenu();
     setActiveTab("profile");
   };
 
@@ -653,17 +676,40 @@ function initProfilePanel() {
     setActiveTab("catalog");
   };
 
-  if (editProfile) {
-    editProfile.onclick = () => {
+  // Кнопка "Личные данные" - открывает форму
+  if (personalDataButton) {
+    personalDataButton.onclick = () => {
       applyToInputs();
       toggleProfileForm(true);
     };
   }
 
-  if (backToSummary) {
-    backToSummary.onclick = () => {
-      updateSummary();
-      toggleProfileForm(false);
+  // Кнопка "Мои заказы" - отправляет запрос
+  if (myOrdersButton) {
+    myOrdersButton.onclick = () => {
+      const sent = sendWebAppData({ type: "myorders" });
+      if (sent) {
+        const tg = getTelegram();
+        tg.showPopup({
+          title: "Ваши заказы",
+          message: "Список заказов отправлен в чат с ботом.",
+          buttons: [{ id: "ok", type: "default", text: "OK" }],
+        });
+      }
+    };
+  }
+
+  // Кнопка "Назад в меню" из формы
+  if (backToMenuButton) {
+    backToMenuButton.onclick = () => {
+      showProfileMenu();
+    };
+  }
+
+  // Кнопка "Назад в меню" из сводки
+  if (backToMenuFromSummary) {
+    backToMenuFromSummary.onclick = () => {
+      showProfileMenu();
     };
   }
 
@@ -758,19 +804,7 @@ function initProfilePanel() {
     toggleProfileForm(false);
   };
 
-  if (myOrders) {
-    myOrders.onclick = () => {
-      const sent = sendWebAppData({ type: "myorders" });
-      if (sent) {
-        const tg = getTelegram();
-        tg.showPopup({
-          title: "Ваши заказы",
-          message: "Список заказов отправлен в чат с ботом.",
-          buttons: [{ id: "ok", type: "default", text: "OK" }],
-        });
-      }
-    };
-  }
+  // Удаляем старый обработчик myOrders - теперь он в меню
 }
 
 document.addEventListener("DOMContentLoaded", () => {

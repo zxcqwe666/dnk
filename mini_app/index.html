@@ -112,13 +112,29 @@
             <div>
               <div class="profile-title-main">Профиль</div>
               <div class="profile-title-sub">
-                Размеры, город и контакты для заказов
+                Управление данными и заказами
               </div>
             </div>
           </div>
           <button id="closeProfile" class="icon-button">✕</button>
         </div>
-        <div id="profileSummary" class="profile-summary">
+
+        <!-- Главное меню профиля -->
+        <div id="profileMenu" class="profile-menu">
+          <button id="personalDataButton" class="menu-button">
+            <span class="menu-icon">📝</span>
+            <span class="menu-text">Личные данные</span>
+            <span class="menu-arrow">→</span>
+          </button>
+          <button id="myOrdersButton" class="menu-button">
+            <span class="menu-icon">📦</span>
+            <span class="menu-text">Мои заказы</span>
+            <span class="menu-arrow">→</span>
+          </button>
+        </div>
+
+        <!-- Сводка профиля (показывает заполненные данные) -->
+        <div id="profileSummary" class="profile-summary hidden">
           <div class="profile-summary-row">
             <span class="profile-summary-label">Размер обуви</span>
             <span id="summaryShoe" class="profile-summary-value">—</span>
@@ -139,10 +155,19 @@
             <span class="profile-summary-label">Телефон</span>
             <span id="summaryPhone" class="profile-summary-value">—</span>
           </div>
-          <button id="editProfileButton" class="primary-button">
-            Заполнить личные данные
+          <button id="editProfileButton" class="secondary-button secondary-button--full">
+            Изменить данные
           </button>
         </div>
+
+        <!-- Кнопка возврата в меню из сводки -->
+        <div id="summaryBackButton" class="profile-footer hidden">
+          <button id="backToMenuFromSummary" class="secondary-button secondary-button--full">
+            Назад в меню
+          </button>
+        </div>
+
+        <!-- Форма личных данных -->
         <div id="profileForm" class="profile-body hidden">
           <div class="field">
             <label class="field-label" for="shoeSize">Размер обуви</label>
@@ -205,15 +230,13 @@
             DNK и не передаются третьим лицам.
           </p>
         </div>
+        <!-- Кнопки внизу формы -->
         <div class="profile-footer hidden" id="profileFooter">
           <button id="saveProfileButton" class="primary-button">
             Сохранить профиль
           </button>
-          <button id="backToSummaryButton" class="secondary-button secondary-button--full">
-            Назад
-          </button>
-          <button id="myOrdersButton" class="secondary-button secondary-button--full">
-            Мои заказы
+          <button id="backToMenuButton" class="secondary-button secondary-button--full">
+            Назад в меню
           </button>
         </div>
       </div>

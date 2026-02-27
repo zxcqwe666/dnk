@@ -369,6 +369,51 @@ body {
   margin-bottom: 10px;
 }
 
+/* Меню профиля */
+.profile-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.menu-button {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(34, 39, 54, 0.95), rgba(20, 24, 36, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.menu-button:active {
+  transform: scale(0.98);
+  background: linear-gradient(135deg, rgba(44, 50, 66, 0.95), rgba(25, 30, 44, 0.9));
+}
+
+.menu-icon {
+  font-size: 22px;
+  width: 32px;
+  text-align: center;
+}
+
+.menu-text {
+  flex: 1;
+}
+
+.menu-arrow {
+  color: var(--text-muted);
+  font-size: 18px;
+}
+
 .profile-body {
   max-height: calc(100vh - 130px);
   overflow-y: auto;
