@@ -396,9 +396,6 @@ function initCartPanel() {
         message: text,
         buttons: [{ id: "ok", type: "default", text: "OK" }],
       });
-      setTimeout(() => {
-        tg.openTelegramLink(BOT_URL);
-      }, 400);
       cart = {};
       updateCartBadge();
       renderCart();
@@ -684,11 +681,14 @@ function initProfilePanel() {
 
   if (myOrders) {
     myOrders.onclick = () => {
-      const tg = getTelegram();
-      if (tg) {
-        tg.openTelegramLink(`${BOT_URL}?start=myorders`);
-      } else {
-        window.location.href = `${BOT_URL}?start=myorders`;
+      const sent = sendWebAppData({ type: "myorders" });
+      if (sent) {
+        const tg = getTelegram();
+        tg.showPopup({
+          title: "Ваши заказы",
+          message: "Список заказов отправлен в чат с ботом.",
+          buttons: [{ id: "ok", type: "default", text: "OK" }],
+        });
       }
     };
   }
