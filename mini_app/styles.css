@@ -225,6 +225,14 @@ body {
   transform: translateY(1px);
 }
 
+.secondary-button--full {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(16, 20, 28, 0.96);
+}
+
 .cart-panel {
   position: fixed;
   inset: 0;

@@ -164,6 +164,11 @@ def get_cart(storage: Dict, user_id: int) -> Dict[str, int]:
 
 async def cmd_start(message: Message, state: FSMContext) -> None:
     await state.clear()
+    if message.text and message.text.startswith("/start "):
+        payload = message.text.split(maxsplit=1)[1].strip()
+        if payload == "myorders":
+            await cmd_myorders(message)
+            return
     text = (
         "Привет! 👋\n\n"
         "Я бот-магазин оригинальных кроссовок и одежды.\n"

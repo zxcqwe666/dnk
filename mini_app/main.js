@@ -375,6 +375,8 @@ function initCartPanel() {
         title: "Заказ оформлен",
         message: text,
         buttons: [{ id: "ok", type: "default", text: "OK" }],
+      }).then(() => {
+        window.Telegram.WebApp.close();
       });
       cart = {};
       updateCartBadge();
@@ -668,12 +670,14 @@ function initProfilePanel() {
           })
         );
         window.Telegram.WebApp.showPopup({
-          title: "Заказы отправлены",
-          message: "Мы отправили ваши заказы в чат с ботом.",
+          title: "Ваши заказы",
+          message: "Список заказов отправлен в чат с ботом.",
           buttons: [{ id: "ok", type: "default", text: "OK" }],
+        }).then(() => {
+          window.Telegram.WebApp.close();
         });
       } else {
-        alert("Откройте в Telegram, чтобы посмотреть заказы.");
+        window.location.href = BOT_URL;
       }
     };
   }
