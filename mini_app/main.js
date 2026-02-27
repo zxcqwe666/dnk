@@ -542,13 +542,14 @@ function initProfilePanel() {
   const close = document.getElementById("closeProfile");
   const save = document.getElementById("saveProfileButton");
   const personalDataButton = document.getElementById("personalDataButton");
+  const personalDataContent = document.getElementById("personalDataContent");
+  let isPersonalDataOpen = false;
   const myOrdersButton = document.getElementById("myOrdersButton");
+  const ordersList = document.getElementById("ordersList");
   const profileMenu = document.getElementById("profileMenu");
-  const profileForm = document.getElementById("profileForm");
   const profileFooter = document.getElementById("profileFooter");
 
   const closeSearch = document.getElementById("closeSearch");
-  const closeOrders = document.getElementById("closeOrders");
   const searchInput = document.getElementById("searchQuery");
   const searchResults = document.getElementById("searchResults");
 
@@ -653,10 +654,13 @@ function initProfilePanel() {
 
   const showProfileMenu = () => {
     profileMenu.classList.remove("hidden");
-    profileForm.classList.add("hidden");
-    profileForm.classList.remove("open");
-    profileFooter.classList.add("hidden");
-    profileFooter.classList.remove("open");
+    // Скрываем все выпадающие блоки
+    personalDataContent.classList.add("hidden");
+    personalDataContent.classList.remove("open");
+    ordersContent.classList.add("hidden");
+    ordersContent.classList.remove("open");
+    isPersonalDataOpen = false;
+    isOrdersOpen = false;
   };
 
   window.openProfileForm = () => {
@@ -777,24 +781,30 @@ function initProfilePanel() {
     };
   }
 
+  let isOrdersOpen = false;
   // Кнопка "Мои заказы" - показывает историю заказов
   if (myOrdersButton) {
     myOrdersButton.onclick = () => {
-      renderOrders();
-      ordersPanel.classList.remove("hidden");
+      isOrdersOpen = !isOrdersOpen;
+      const ordersContent = document.getElementById("ordersContent");
+      if (isOrdersOpen) {
+        renderOrders();
+        ordersContent.classList.remove("hidden");
+        ordersContent.classList.add("open");
+        // Скрываем форму личных данных если открыта
+        personalDataContent.classList.add("hidden");
+        personalDataContent.classList.remove("open");
+        isPersonalDataOpen = false;
+      } else {
+        ordersContent.classList.add("hidden");
+        ordersContent.classList.remove("open");
+      }
     };
   }
 
   closeSearch.onclick = () => {
     setActiveTab("catalog");
   };
-
-  if (closeOrders) {
-    closeOrders.onclick = () => {
-      profileMenu.classList.remove("hidden");
-      ordersPanel.classList.add("hidden");
-    };
-  }
 
   searchInput.addEventListener("input", (e) => {
     renderSearchResults(e.target.value);

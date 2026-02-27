@@ -7,7 +7,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
     />
-    <link rel="stylesheet" href="styles.css?v=14" />
+    <link rel="stylesheet" href="styles.css?v=15" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
   <body>
@@ -60,26 +60,6 @@
           <button id="checkoutButton" class="primary-button">
             Оформить заказ
           </button>
-        </div>
-      </div>
-
-      <!-- Панель заказов -->
-      <div id="ordersPanel" class="cart-panel hidden">
-        <div class="cart-header">
-          <div class="profile-title">
-            <div class="profile-avatar">📦</div>
-            <div>
-              <div class="profile-title-main">Мои заказы</div>
-              <div class="profile-title-sub">История ваших заказов</div>
-            </div>
-          </div>
-          <button id="closeOrders" class="icon-button">✕</button>
-        </div>
-        <div class="cart-body">
-          <div id="ordersEmpty" class="empty-state hidden">
-            У вас пока нет заказов.
-          </div>
-          <div id="ordersItems" class="orders-list"></div>
         </div>
       </div>
 
@@ -147,6 +127,70 @@
             <span class="menu-text">Личные данные</span>
             <span class="menu-arrow">→</span>
           </button>
+          
+          <!-- Контент личных данных (выпадающий блок) -->
+          <div id="personalDataContent" class="profile-body hidden">
+            <div class="field">
+              <label class="field-label" for="shoeSize">Размер обуви</label>
+              <input id="shoeSize" class="field-input" placeholder="Например 42" />
+              <div id="shoeError" class="field-error"></div>
+            </div>
+            <div class="field">
+              <label class="field-label" for="clothingSize">Размер одежды</label>
+              <input
+                id="clothingSize"
+                class="field-input"
+                placeholder="S / M / L или RU 46"
+              />
+              <div id="clothingError" class="field-error"></div>
+            </div>
+            <div class="field">
+              <label class="field-label" for="city">Город</label>
+              <select id="city" class="field-input">
+                <option value="Минск">Минск</option>
+                <option value="Брест">Брест</option>
+                <option value="Витебск">Витебск</option>
+                <option value="Гродно">Гродно</option>
+                <option value="Гомель">Гомель</option>
+                <option value="Могилёв">Могилёв</option>
+                <option value="Барановичи">Барановичи</option>
+                <option value="Бобруйск">Бобруйск</option>
+                <option value="Борисов">Борисов</option>
+                <option value="Лида">Лида</option>
+                <option value="Молодечно">Молодечно</option>
+                <option value="Орша">Орша</option>
+                <option value="Пинск">Пинск</option>
+                <option value="Полоцк">Полоцк</option>
+                <option value="Новополоцк">Новополоцк</option>
+                <option value="Солигорск">Солигорск</option>
+                <option value="Мозырь">Мозырь</option>
+              </select>
+              <div id="cityError" class="field-error"></div>
+            </div>
+            <div class="field">
+              <label class="field-label" for="delivery">Способ доставки</label>
+              <select id="delivery" class="field-input">
+                <option value="Личная встреча">Личная встреча</option>
+                <option value="Европочта">Европочта</option>
+                <option value="Белпочта">Белпочта</option>
+              </select>
+              <div id="deliveryError" class="field-error"></div>
+            </div>
+            <div class="field">
+              <label class="field-label" for="phone">Телефон</label>
+              <input
+                id="phone"
+                class="field-input"
+                placeholder="+375 29 123 45 67"
+                inputmode="tel"
+              />
+              <div id="phoneError" class="field-error"></div>
+            </div>
+            <button id="saveProfileButton" class="primary-button">
+              Сохранить профиль
+            </button>
+          </div>
+
           <button id="myOrdersButton" class="menu-button">
             <span class="menu-icon">📦</span>
             <span class="menu-text">Мои заказы</span>
@@ -154,70 +198,13 @@
           </button>
         </div>
 
-        <!-- Форма личных данных -->
-        <div id="profileForm" class="profile-body hidden">
-          <div class="field">
-            <label class="field-label" for="shoeSize">Размер обуви</label>
-            <input id="shoeSize" class="field-input" placeholder="Например 42" />
-            <div id="shoeError" class="field-error"></div>
+        <!-- Контент заказов (выпадающий блок) -->
+        <div id="ordersContent" class="profile-body hidden">
+          <div id="ordersEmpty" class="empty-state hidden">
+            У вас пока нет заказов.
           </div>
-          <div class="field">
-            <label class="field-label" for="clothingSize">Размер одежды</label>
-            <input
-              id="clothingSize"
-              class="field-input"
-              placeholder="S / M / L или RU 46"
-            />
-            <div id="clothingError" class="field-error"></div>
-          </div>
-          <div class="field">
-            <label class="field-label" for="city">Город</label>
-            <select id="city" class="field-input">
-              <option value="Минск">Минск</option>
-              <option value="Брест">Брест</option>
-              <option value="Витебск">Витебск</option>
-              <option value="Гродно">Гродно</option>
-              <option value="Гомель">Гомель</option>
-              <option value="Могилёв">Могилёв</option>
-              <option value="Барановичи">Барановичи</option>
-              <option value="Бобруйск">Бобруйск</option>
-              <option value="Борисов">Борисов</option>
-              <option value="Лида">Лида</option>
-              <option value="Молодечно">Молодечно</option>
-              <option value="Орша">Орша</option>
-              <option value="Пинск">Пинск</option>
-              <option value="Полоцк">Полоцк</option>
-              <option value="Новополоцк">Новополоцк</option>
-              <option value="Солигорск">Солигорск</option>
-              <option value="Мозырь">Мозырь</option>
-            </select>
-            <div id="cityError" class="field-error"></div>
-          </div>
-          <div class="field">
-            <label class="field-label" for="delivery">Способ доставки</label>
-            <select id="delivery" class="field-input">
-              <option value="Личная встреча">Личная встреча</option>
-              <option value="Европочта">Европочта</option>
-              <option value="Белпочта">Белпочта</option>
-            </select>
-            <div id="deliveryError" class="field-error"></div>
-          </div>
-          <div class="field">
-            <label class="field-label" for="phone">Телефон</label>
-            <input
-              id="phone"
-              class="field-input"
-              placeholder="+375 29 123 45 67"
-              inputmode="tel"
-            />
-            <div id="phoneError" class="field-error"></div>
-          </div>
-          <button id="saveProfileButton" class="primary-button">
-            Сохранить профиль
-          </button>
+          <div id="ordersList" class="orders-list"></div>
         </div>
-
-        <div id="profileFooter" class="profile-footer hidden"></div>
       </div>
 
       <nav class="bottom-nav">
@@ -235,6 +222,6 @@
       </nav>
     </div>
 
-    <script src="main.js?v=14"></script>
+    <script src="main.js?v=15"></script>
   </body>
 </html>
