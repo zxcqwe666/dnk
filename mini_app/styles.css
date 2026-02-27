@@ -369,12 +369,90 @@ body {
   margin-bottom: 10px;
 }
 
-/* Меню профиля */
+/* Profile menu */
 .profile-menu {
   display: flex;
   flex-direction: column;
   gap: 10px;
   margin-top: 10px;
+}
+
+/* Collapsible form section */
+.profile-form-section {
+  margin-top: 10px;
+}
+
+.profile-form-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(34, 39, 54, 0.95), rgba(20, 24, 36, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.profile-form-toggle:active {
+  transform: scale(0.98);
+}
+
+.profile-form-toggle .menu-icon {
+  font-size: 22px;
+  margin-right: 14px;
+}
+
+.profile-form-toggle .menu-text {
+  flex: 1;
+}
+
+.profile-form-toggle .menu-arrow {
+  color: var(--text-muted);
+  font-size: 18px;
+  transition: transform 0.3s ease;
+}
+
+.profile-form-toggle.open .menu-arrow {
+  transform: rotate(180deg);
+}
+
+/* The actual form - hidden by default */
+#profileForm {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, opacity 0.3s ease-out, padding 0.3s ease-out;
+  opacity: 0;
+  padding: 0 14px;
+  margin-top: 0;
+}
+
+#profileForm.open {
+  max-height: 500px;
+  opacity: 1;
+  padding: 14px;
+  margin-top: 10px;
+}
+
+#profileFooter {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+  opacity: 0;
+  padding: 0;
+  margin-top: 0;
+}
+
+#profileFooter.open {
+  max-height: 100px;
+  opacity: 1;
+  padding: 8px 14px;
+  margin-top: 8px;
 }
 
 .menu-button {
