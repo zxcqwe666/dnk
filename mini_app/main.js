@@ -81,9 +81,15 @@ function initTelegram() {
     return;
   }
   const tg = window.Telegram.WebApp;
+  window.tg = tg;
+  tg.ready();
   tg.expand();
   tg.setHeaderColor("#0f1115");
   tg.setBackgroundColor("#050509");
+}
+
+function getTelegram() {
+  return window.tg || window.Telegram?.WebApp || null;
 }
 
 function initQrPanel() {
@@ -362,8 +368,9 @@ function initCartPanel() {
 
     const text = lines.join("\n");
 
-    if (window.Telegram?.WebApp) {
-      window.Telegram.WebApp.sendData(
+    const tg = getTelegram();
+    if (tg && tg.initData) {
+      tg.sendData(
         JSON.stringify({
           type: "order",
           items: cart,
@@ -371,13 +378,15 @@ function initCartPanel() {
           profile,
         })
       );
-      window.Telegram.WebApp.showPopup({
+      tg.showPopup({
         title: "Заказ оформлен",
         message: text,
         buttons: [{ id: "ok", type: "default", text: "OK" }],
-      }).then(() => {
-        window.Telegram.WebApp.close();
       });
+      setTimeout(() => {
+        tg.openTelegramLink(BOT_URL);
+        tg.close();
+      }, 200);
       cart = {};
       updateCartBadge();
       renderCart();
@@ -663,21 +672,12 @@ function initProfilePanel() {
 
   if (myOrders) {
     myOrders.onclick = () => {
-      if (window.Telegram?.WebApp) {
-        window.Telegram.WebApp.sendData(
-          JSON.stringify({
-            type: "myorders",
-          })
-        );
-        window.Telegram.WebApp.showPopup({
-          title: "Ваши заказы",
-          message: "Список заказов отправлен в чат с ботом.",
-          buttons: [{ id: "ok", type: "default", text: "OK" }],
-        }).then(() => {
-          window.Telegram.WebApp.close();
-        });
+      const tg = getTelegram();
+      if (tg) {
+        tg.openTelegramLink(`${BOT_URL}?start=myorders`);
+        tg.close();
       } else {
-        window.location.href = BOT_URL;
+        window.location.href = `${BOT_URL}?start=myorders`;
       }
     };
   }

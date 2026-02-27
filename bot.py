@@ -379,6 +379,9 @@ async def on_webapp_data(message: Message) -> None:
     user = message.from_user
 
     if kind == "order":
+        if not payload.get("items"):
+            await message.answer("Заказ пустой. Добавьте товары и повторите.")
+            return
         order_id = await save_order(
             user_id=user.id,
             username=user.username,
