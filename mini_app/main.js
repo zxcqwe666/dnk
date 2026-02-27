@@ -575,7 +575,9 @@ function initProfilePanel() {
   };
 
   tabProfile.onclick = () => {
-    showProfileMenu();
+    if (!isFormOpen) {
+      showProfileMenu();
+    }
     setActiveTab("profile");
   };
 
