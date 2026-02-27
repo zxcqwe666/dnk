@@ -672,11 +672,17 @@ function initProfilePanel() {
     setActiveTab("catalog");
   };
 
-  // Кнопка "Личные данные" - открывает форму
+  // Кнопка "Личные данные" - открывает/закрывает форму
+  let isFormOpen = false;
   if (personalDataButton) {
     personalDataButton.onclick = () => {
-      applyToInputs();
-      toggleProfileForm(true);
+      isFormOpen = !isFormOpen;
+      if (isFormOpen) {
+        applyToInputs();
+        toggleProfileForm(true);
+      } else {
+        toggleProfileForm(false);
+      }
     };
   }
 
