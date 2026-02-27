@@ -157,6 +157,28 @@ function saveProfileToStorage() {
   } catch (_) {}
 }
 
+function loadOrdersFromStorage() {
+  try {
+    const raw = localStorage.getItem("dnk_orders_v1");
+    if (!raw) return [];
+    return JSON.parse(raw);
+  } catch (_) {
+    return [];
+  }
+}
+
+function saveOrdersToStorage(orders) {
+  try {
+    localStorage.setItem("dnk_orders_v1", JSON.stringify(orders));
+  } catch (_) {}
+}
+
+function addOrderToStorage(order) {
+  const orders = loadOrdersFromStorage();
+  orders.unshift(order);
+  saveOrdersToStorage(orders);
+}
+
 function normalizePhone(raw) {
   return raw.replace(/[^\d+]/g, "");
 }
@@ -339,6 +361,56 @@ function renderCart() {
 
 window.renderCart = renderCart;
 
+function renderOrders() {
+  const orders = loadOrdersFromStorage();
+  const ordersItems = document.getElementById("ordersItems");
+  const ordersEmpty = document.getElementById("ordersEmpty");
+  
+  ordersItems.innerHTML = "";
+  
+  if (orders.length === 0) {
+    if (ordersEmpty) ordersEmpty.classList.remove("hidden");
+    return;
+  }
+  
+  if (ordersEmpty) ordersEmpty.classList.add("hidden");
+  
+  orders.forEach(order => {
+    const card = document.createElement("div");
+    card.className = "order-card";
+    
+    const header = document.createElement("div");
+    header.className = "order-header";
+    
+    const id = document.createElement("span");
+    id.className = "order-id";
+    id.textContent = "#" + order.id;
+    
+    const date = document.createElement("span");
+    date.className = "order-date";
+    date.textContent = order.created_at ? order.created_at.slice(0, 10) : "";
+    
+    header.appendChild(id);
+    header.appendChild(date);
+    
+    const total = document.createElement("div");
+    total.className = "order-total";
+    total.textContent = formatPrice(order.total);
+    
+    const items = document.createElement("div");
+    items.className = "order-items";
+    items.textContent = order.items_summary || "";
+    
+    card.appendChild(header);
+    card.appendChild(total);
+    card.appendChild(items);
+    
+    ordersItems.appendChild(card);
+  });
+}
+
+window.renderOrders = renderOrders;
+
 function initCartPanel() {
   const tabCart = document.getElementById("tabCart");
   const panel = document.getElementById("cartPanel");
@@ -416,6 +488,22 @@ function initCartPanel() {
       profile,
     });
     if (sent) {
+      // Сохраняем заказ в localStorage
+      const orderId = Date.now();
+      const itemsSummary = Object.entries(cart).map(([id, qty]) => {
+        const product = CATALOG.sneakers.find(p => p.id === id) || CATALOG.clothes.find(p => p.id === id);
+        return product ? `${product.name} x${qty}` : '';
+      }).filter(x => x).join(', ');
+      
+      addOrderToStorage({
+        id: orderId,
+        items: cart,
+        total,
+        profile,
+        items_summary: itemsSummary,
+        created_at: new Date().toISOString()
+      });
+      
       const tg = getTelegram();
       tg.showPopup({
         title: "Заказ оформлен",
@@ -449,6 +537,7 @@ function initProfilePanel() {
   const panel = document.getElementById("profilePanel");
   const searchPanel = document.getElementById("searchPanel");
   const cartPanel = document.getElementById("cartPanel");
+  const ordersPanel = document.getElementById("ordersPanel");
 
   const close = document.getElementById("closeProfile");
   const save = document.getElementById("saveProfileButton");
@@ -459,6 +548,7 @@ function initProfilePanel() {
   const profileFooter = document.getElementById("profileFooter");
 
   const closeSearch = document.getElementById("closeSearch");
+  const closeOrders = document.getElementById("closeOrders");
   const searchInput = document.getElementById("searchQuery");
   const searchResults = document.getElementById("searchResults");
 
@@ -687,24 +777,24 @@ function initProfilePanel() {
     };
   }
 
-  // Кнопка "Мои заказы" - отправляет запрос
+  // Кнопка "Мои заказы" - показывает историю заказов
   if (myOrdersButton) {
     myOrdersButton.onclick = () => {
-      const sent = sendWebAppData({ type: "myorders" });
-      if (sent) {
-        const tg = getTelegram();
-        tg.showPopup({
-          title: "Ваши заказы",
-          message: "Список заказов отправлен в чат с ботом.",
-          buttons: [{ id: "ok", type: "default", text: "OK" }],
-        });
-      }
+      renderOrders();
+      ordersPanel.classList.remove("hidden");
     };
   }
 
   closeSearch.onclick = () => {
     setActiveTab("catalog");
   };
+
+  if (closeOrders) {
+    closeOrders.onclick = () => {
+      profileMenu.classList.remove("hidden");
+      ordersPanel.classList.add("hidden");
+    };
+  }
 
   searchInput.addEventListener("input", (e) => {
     renderSearchResults(e.target.value);

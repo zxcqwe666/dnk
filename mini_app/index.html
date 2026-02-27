@@ -7,7 +7,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
     />
-    <link rel="stylesheet" href="styles.css?v=13" />
+    <link rel="stylesheet" href="styles.css?v=14" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
   <body>
@@ -60,6 +60,26 @@
           <button id="checkoutButton" class="primary-button">
             Оформить заказ
           </button>
+        </div>
+      </div>
+
+      <!-- Панель заказов -->
+      <div id="ordersPanel" class="cart-panel hidden">
+        <div class="cart-header">
+          <div class="profile-title">
+            <div class="profile-avatar">📦</div>
+            <div>
+              <div class="profile-title-main">Мои заказы</div>
+              <div class="profile-title-sub">История ваших заказов</div>
+            </div>
+          </div>
+          <button id="closeOrders" class="icon-button">✕</button>
+        </div>
+        <div class="cart-body">
+          <div id="ordersEmpty" class="empty-state hidden">
+            У вас пока нет заказов.
+          </div>
+          <div id="ordersItems" class="orders-list"></div>
         </div>
       </div>
 
@@ -215,6 +235,6 @@
       </nav>
     </div>
 
-    <script src="main.js?v=13"></script>
+    <script src="main.js?v=14"></script>
   </body>
 </html>
