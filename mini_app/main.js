@@ -755,7 +755,14 @@ function initProfilePanel() {
       hasError = true;
     }
 
+    // Сначала скрываем форму
+    toggleProfileForm(false);
+    isFormOpen = false;
+
     if (hasError) {
+      // Показываем форму обратно если есть ошибки
+      toggleProfileForm(true);
+      isFormOpen = true;
       if (window.Telegram?.WebApp) {
         window.Telegram.WebApp.showAlert("Проверьте данные профиля и исправьте ошибки.");
       } else {
@@ -787,9 +794,6 @@ function initProfilePanel() {
         buttons: [{ id: "ok", type: "default", text: "OK" }],
       });
     }
-
-    toggleProfileForm(false);
-    isFormOpen = false;
   };
 
   // Удаляем старый обработчик myOrders - теперь он в меню
