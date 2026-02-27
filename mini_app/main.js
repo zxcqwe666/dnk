@@ -454,14 +454,10 @@ function initProfilePanel() {
   const save = document.getElementById("saveProfileButton");
   const personalDataButton = document.getElementById("personalDataButton");
   const myOrdersButton = document.getElementById("myOrdersButton");
-  const editProfile = document.getElementById("editProfileButton");
   const backToMenuButton = document.getElementById("backToMenuButton");
-  const backToMenuFromSummary = document.getElementById("backToMenuFromSummary");
-  const profileSummary = document.getElementById("profileSummary");
   const profileMenu = document.getElementById("profileMenu");
   const profileForm = document.getElementById("profileForm");
   const profileFooter = document.getElementById("profileFooter");
-  const summaryBackButton = document.getElementById("summaryBackButton");
 
   const closeSearch = document.getElementById("closeSearch");
   const searchInput = document.getElementById("searchQuery");
@@ -544,16 +540,12 @@ function initProfilePanel() {
   const toggleProfileForm = (showForm) => {
     if (showForm) {
       profileMenu.classList.add("hidden");
-      profileSummary.classList.add("hidden");
-      summaryBackButton.classList.add("hidden");
       profileForm.classList.remove("hidden");
       profileForm.classList.add("open");
       profileFooter.classList.remove("hidden");
       profileFooter.classList.add("open");
     } else {
       profileMenu.classList.remove("hidden");
-      profileSummary.classList.add("hidden");
-      summaryBackButton.classList.add("hidden");
       profileForm.classList.add("hidden");
       profileForm.classList.remove("open");
       profileFooter.classList.add("hidden");
@@ -562,20 +554,16 @@ function initProfilePanel() {
   };
 
   const showProfileSummary = () => {
-    updateSummary();
+    // Profile summary removed - form shows directly
     profileMenu.classList.add("hidden");
-    profileSummary.classList.remove("hidden");
-    summaryBackButton.classList.remove("hidden");
-    profileForm.classList.add("hidden");
-    profileForm.classList.remove("open");
-    profileFooter.classList.add("hidden");
-    profileFooter.classList.remove("open");
+    profileForm.classList.remove("hidden");
+    profileForm.classList.add("open");
+    profileFooter.classList.remove("hidden");
+    profileFooter.classList.add("open");
   };
 
   const showProfileMenu = () => {
     profileMenu.classList.remove("hidden");
-    profileSummary.classList.add("hidden");
-    summaryBackButton.classList.add("hidden");
     profileForm.classList.add("hidden");
     profileForm.classList.remove("open");
     profileFooter.classList.add("hidden");
