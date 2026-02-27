@@ -3,8 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <title>DNK Mini App</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="styles.css?v=4" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <link rel="stylesheet" href="styles.css?v=5" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
   <body>
@@ -17,12 +20,10 @@
             <div class="brand-sub">обувь • одежда</div>
           </div>
         </div>
-        <button id="cartButton" class="icon-button">
-          🛒 <span id="cartCount" class="badge">0</span>
-        </button>
+        <button id="qrButton" class="icon-button">QR</button>
       </header>
 
-      <main class="content">
+      <main class="content" id="catalogView">
         <section id="categories" class="section">
           <h2>Категории</h2>
           <div class="chips" id="categoryChips"></div>
@@ -36,10 +37,21 @@
 
       <div id="cartPanel" class="cart-panel hidden">
         <div class="cart-header">
-          <h2>Корзина</h2>
+          <div class="profile-title">
+            <div class="profile-avatar"></div>
+            <div>
+              <div class="profile-title-main">Корзина</div>
+              <div class="profile-title-sub">Проверьте товары перед заказом</div>
+            </div>
+          </div>
           <button id="closeCart" class="icon-button">✕</button>
         </div>
-        <div id="cartItems" class="cart-items"></div>
+        <div class="cart-body">
+          <div id="cartEmpty" class="empty-state hidden">
+            В корзине пока пусто. Добавьте товары из каталога или поиска.
+          </div>
+          <div id="cartItems" class="cart-items"></div>
+        </div>
         <div class="cart-footer">
           <div class="cart-total">
             <span>Итого:</span>
@@ -51,6 +63,48 @@
         </div>
       </div>
 
+      <div id="searchPanel" class="search-panel hidden">
+        <div class="search-header">
+          <div class="profile-title">
+            <div class="profile-avatar">🔍</div>
+            <div>
+              <div class="profile-title-main">Поиск</div>
+              <div class="profile-title-sub">
+                Найдите нужную модель по названию или описанию
+              </div>
+            </div>
+          </div>
+          <button id="closeSearch" class="icon-button">✕</button>
+        </div>
+        <div class="search-body">
+          <div class="field">
+            <input
+              id="searchQuery"
+              class="field-input"
+              placeholder="Введите название или бренд"
+            />
+          </div>
+          <div id="searchResults" class="product-grid"></div>
+        </div>
+      </div>
+
+      <div id="qrPanel" class="qr-panel hidden">
+        <div class="qr-header">
+          <div class="profile-title">
+            <div class="profile-avatar"></div>
+            <div>
+              <div class="profile-title-main">QR бота</div>
+              <div class="profile-title-sub">
+                Отсканируйте, чтобы открыть DNK бота
+              </div>
+            </div>
+          </div>
+          <button id="closeQr" class="icon-button">✕</button>
+        </div>
+        <div class="qr-body">
+          <img id="qrImage" class="qr-image" alt="QR бота" />
+        </div>
+      </div>
       <div id="profilePanel" class="profile-panel hidden">
         <div class="profile-header">
           <div class="profile-title">
@@ -64,7 +118,32 @@
           </div>
           <button id="closeProfile" class="icon-button">✕</button>
         </div>
-        <div class="profile-body">
+        <div id="profileSummary" class="profile-summary">
+          <div class="profile-summary-row">
+            <span class="profile-summary-label">Размер обуви</span>
+            <span id="summaryShoe" class="profile-summary-value">—</span>
+          </div>
+          <div class="profile-summary-row">
+            <span class="profile-summary-label">Размер одежды</span>
+            <span id="summaryClothing" class="profile-summary-value">—</span>
+          </div>
+          <div class="profile-summary-row">
+            <span class="profile-summary-label">Город</span>
+            <span id="summaryCity" class="profile-summary-value">—</span>
+          </div>
+          <div class="profile-summary-row">
+            <span class="profile-summary-label">Доставка</span>
+            <span id="summaryDelivery" class="profile-summary-value">—</span>
+          </div>
+          <div class="profile-summary-row">
+            <span class="profile-summary-label">Телефон</span>
+            <span id="summaryPhone" class="profile-summary-value">—</span>
+          </div>
+          <button id="editProfileButton" class="primary-button">
+            Заполнить личные данные
+          </button>
+        </div>
+        <div id="profileForm" class="profile-body hidden">
           <div class="field">
             <label class="field-label" for="shoeSize">Размер обуви</label>
             <input id="shoeSize" class="field-input" placeholder="Например 42" />
@@ -82,7 +161,6 @@
           <div class="field">
             <label class="field-label" for="city">Город</label>
             <select id="city" class="field-input">
-              <option value="">Выберите город</option>
               <option value="Минск">Минск</option>
               <option value="Брест">Брест</option>
               <option value="Витебск">Витебск</option>
@@ -106,7 +184,6 @@
           <div class="field">
             <label class="field-label" for="delivery">Способ доставки</label>
             <select id="delivery" class="field-input">
-              <option value="">Выберите способ доставки</option>
               <option value="Личная встреча">Личная встреча</option>
               <option value="Европочта">Европочта</option>
               <option value="Белпочта">Белпочта</option>
@@ -128,17 +205,34 @@
             DNK и не передаются третьим лицам.
           </p>
         </div>
-        <div class="profile-footer">
+        <div class="profile-footer hidden" id="profileFooter">
           <button id="saveProfileButton" class="primary-button">
             Сохранить профиль
           </button>
+          <button id="backToSummaryButton" class="secondary-button secondary-button--full">
+            Назад
+          </button>
+          <button id="myOrdersButton" class="secondary-button secondary-button--full">
+            Мои заказы
+          </button>
         </div>
       </div>
-
-      <button id="profileButton" class="fab-profile">👤 Профиль</button>
+      <nav class="bottom-nav">
+        <button
+          id="tabCatalog"
+          class="bottom-nav-item bottom-nav-item--active"
+        >
+           Каталог
+        </button>
+        <button id="tabSearch" class="bottom-nav-item">Поиск</button>
+        <button id="tabCart" class="bottom-nav-item">
+           Корзина <span id="cartBadge" class="badge badge--nav">0</span>
+        </button>
+        <button id="tabProfile" class="bottom-nav-item">Профиль</button>
+      </nav>
     </div>
 
-    <script src="main.js?v=4"></script>
+    <script src="main.js?v=6"></script>
   </body>
   </html>
 
