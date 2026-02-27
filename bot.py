@@ -469,11 +469,12 @@ async def on_webapp_data(message: Message) -> None:
             await message.answer("У вас пока нет заказов.")
             return
 
-        lines: list[str] = ["Ваши последние заказы:\n"]
+        lines: list[str] = ["📦 Ваши заказы:\n"]
         for o in orders:
             lines.append(
-                f"#{o['id']} — {format_price(o['total'])} — {o['created_at']}"
+                f"#{o['id']} — {format_price(o['total'])} — {o['created_at'][:10]}"
             )
+        lines.append("\nЧтобы посмотреть детали заказа, нажмите /order номер")
         await message.answer("\n".join(lines))
         return
 
@@ -488,16 +489,16 @@ async def cmd_orders(message: Message) -> None:
         await message.answer("Команда доступна только администратору.")
         return
 
-    orders = await fetch_last_orders(limit=10)
+    orders = await fetch_last_orders(limit=20)
     if not orders:
         await message.answer("Заказов пока нет.")
         return
 
-    lines: list[str] = ["Последние заказы:\n"]
+    lines: list[str] = ["📦 Последние заказы:\n"]
     for o in orders:
-        user = o.get("username") or o.get("full_name") or o["user_id"]
+        user = o.get("username") or o.get("full_name") or f"ID:{o['user_id']}"
         lines.append(
-            f"#{o['id']} — {format_price(o['total'])} — {user} — {o['created_at']}"
+            f"#{o['id']} — {format_price(o['total'])} — {user} — {o['created_at'][:10]}"
         )
 
     await message.answer("\n".join(lines))
