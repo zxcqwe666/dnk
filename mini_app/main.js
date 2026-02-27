@@ -454,7 +454,6 @@ function initProfilePanel() {
   const save = document.getElementById("saveProfileButton");
   const personalDataButton = document.getElementById("personalDataButton");
   const myOrdersButton = document.getElementById("myOrdersButton");
-  const backToMenuButton = document.getElementById("backToMenuButton");
   const profileMenu = document.getElementById("profileMenu");
   const profileForm = document.getElementById("profileForm");
   const profileFooter = document.getElementById("profileFooter");
@@ -701,20 +700,6 @@ function initProfilePanel() {
     };
   }
 
-  // Кнопка "Назад в меню" из формы
-  if (backToMenuButton) {
-    backToMenuButton.onclick = () => {
-      showProfileMenu();
-    };
-  }
-
-  // Кнопка "Назад в меню" из сводки
-  if (backToMenuFromSummary) {
-    backToMenuFromSummary.onclick = () => {
-      showProfileMenu();
-    };
-  }
-
   closeSearch.onclick = () => {
     setActiveTab("catalog");
   };
@@ -804,6 +789,7 @@ function initProfilePanel() {
     }
 
     toggleProfileForm(false);
+    isFormOpen = false;
   };
 
   // Удаляем старый обработчик myOrders - теперь он в меню
