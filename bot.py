@@ -428,12 +428,10 @@ async def on_webapp_data(message: Message) -> None:
         if not profile.get("phone"):
             missing_fields.append("телефон")
         
+        warning = ""
         if missing_fields:
-            await message.answer(
-                f"⚠️ Для оформления заказа рекомендуется заполнить: {', '.join(missing_fields)}.\n"
-                f"Перейдите в профиль и добавьте недостающую информацию."
-            )
-            return
+            warning = f"⚠️ Внимание: не заполнены {', '.join(missing_fields)}.
+"
         
         # Сохранение заказа
         order_id = await save_order(
