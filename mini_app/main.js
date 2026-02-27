@@ -372,7 +372,7 @@ function initCartPanel() {
         })
       );
       window.Telegram.WebApp.showPopup({
-        title: "Черновик заказа",
+        title: "Заказ оформлен",
         message: text,
         buttons: [{ id: "ok", type: "default", text: "OK" }],
       });
@@ -406,6 +406,7 @@ function initProfilePanel() {
 
   const close = document.getElementById("closeProfile");
   const save = document.getElementById("saveProfileButton");
+  const myOrders = document.getElementById("myOrdersButton");
 
   const closeSearch = document.getElementById("closeSearch");
   const searchInput = document.getElementById("searchQuery");
@@ -657,6 +658,25 @@ function initProfilePanel() {
 
     panel.classList.add("hidden");
   };
+
+  if (myOrders) {
+    myOrders.onclick = () => {
+      if (window.Telegram?.WebApp) {
+        window.Telegram.WebApp.sendData(
+          JSON.stringify({
+            type: "myorders",
+          })
+        );
+        window.Telegram.WebApp.showPopup({
+          title: "Заказы отправлены",
+          message: "Мы отправили ваши заказы в чат с ботом.",
+          buttons: [{ id: "ok", type: "default", text: "OK" }],
+        });
+      } else {
+        alert("Откройте в Telegram, чтобы посмотреть заказы.");
+      }
+    };
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {

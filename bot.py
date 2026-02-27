@@ -21,7 +21,14 @@ from aiogram.types import (
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from dotenv import load_dotenv
 
-from db import fetch_last_orders, init_db, save_order, save_user_profile
+from db import (
+    fetch_last_orders,
+    fetch_order_by_id,
+    fetch_user_orders,
+    init_db,
+    save_order,
+    save_user_profile,
+)
 
 
 load_dotenv()
@@ -96,7 +103,7 @@ def main_menu_kb() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
     if WEBAPP_URL:
         kb.button(
-            text="Открыть магазин 🦄",
+            text="Открыть магазин",
             web_app=WebAppInfo(url=WEBAPP_URL),
         )
     else:
@@ -338,7 +345,9 @@ async def cmd_help(message: Message) -> None:
         "Команды:\n"
         "/start — главное меню\n"
         "/help — помощь\n"
-        "/orders — последние заказы (только для админа)\n\n"
+        "/myorders — мои заказы\n"
+        "/orders — последние заказы (только для админа)\n"
+        "/order &lt;id&gt; — детали заказа (только для админа)\n\n"
         "Для вопросов по оплате и доставке напишите менеджеру: "
         "@your_manager_username"
     )
@@ -391,6 +400,20 @@ async def on_webapp_data(message: Message) -> None:
         await message.answer("Профиль обновлён ✅")
         return
 
+    if kind == "myorders":
+        orders = await fetch_user_orders(user_id=user.id, limit=10)
+        if not orders:
+            await message.answer("У вас пока нет заказов.")
+            return
+
+        lines: list[str] = ["Ваши последние заказы:\n"]
+        for o in orders:
+            lines.append(
+                f"#{o['id']} — {format_price(o['total'])} — {o['created_at']}"
+            )
+        await message.answer("\n".join(lines))
+        return
+
     await message.answer("Получены неподдерживаемые данные.")
 
 
@@ -417,6 +440,82 @@ async def cmd_orders(message: Message) -> None:
     await message.answer("\n".join(lines))
 
 
+async def cmd_myorders(message: Message) -> None:
+    orders = await fetch_user_orders(user_id=message.from_user.id, limit=10)
+    if not orders:
+        await message.answer("У вас пока нет заказов.")
+        return
+
+    lines: list[str] = ["Ваши последние заказы:\n"]
+    for o in orders:
+        lines.append(
+            f"#{o['id']} — {format_price(o['total'])} — {o['created_at']}"
+        )
+
+    lines.append(
+        "\nЧтобы посмотреть детали конкретного заказа, отправьте его номер администратору."
+    )
+    await message.answer("\n".join(lines))
+
+
+async def cmd_order_detail(message: Message) -> None:
+    if ADMIN_ID and message.from_user.id != ADMIN_ID:
+        await message.answer("Команда доступна только администратору.")
+        return
+
+    parts = message.text.split(maxsplit=1)
+    if len(parts) < 2 or not parts[1].strip().isdigit():
+        await message.answer("Используйте формат: /order 123")
+        return
+
+    order_id = int(parts[1].strip())
+    order = await fetch_order_by_id(order_id)
+    if not order:
+        await message.answer(f"Заказ #{order_id} не найден.")
+        return
+
+    payload = json.loads(order["payload_json"])
+    items: dict[str, int] = payload.get("items", {})
+    profile = payload.get("profile") or {}
+
+    lines: list[str] = [
+        f"Заказ #{order['id']} от {order['created_at']}",
+        f"Сумма: {format_price(order['total'])}",
+        "",
+        "Товары:",
+    ]
+
+    if not items:
+        lines.append("  (нет позиций)")
+    else:
+        for pid, qty in items.items():
+            product = find_product_by_id(pid)
+            name = product.name if product else pid
+            price = product.price if product else 0
+            line_total = price * qty
+            price_text = (
+                f"{format_price(price)} × {qty} = {format_price(line_total)}"
+                if product
+                else f"{qty} шт."
+            )
+            lines.append(f"- {name}: {price_text}")
+
+    if profile:
+        lines.append("\nПрофиль клиента:")
+        if profile.get("shoe_size"):
+            lines.append(f"Размер обуви: {profile['shoe_size']}")
+        if profile.get("clothing_size"):
+            lines.append(f"Размер одежды: {profile['clothing_size']}")
+        if profile.get("city"):
+            lines.append(f"Город: {profile['city']}")
+        if profile.get("delivery"):
+            lines.append(f"Доставка: {profile['delivery']}")
+        if profile.get("phone"):
+            lines.append(f"Телефон: {profile['phone']}")
+
+    await message.answer("\n".join(lines))
+
+
 async def main() -> None:
     bot = Bot(
         token=API_TOKEN,
@@ -429,6 +528,8 @@ async def main() -> None:
     dp.message.register(cmd_start, CommandStart())
     dp.message.register(cmd_help, Command("help"))
     dp.message.register(cmd_orders, Command("orders"))
+    dp.message.register(cmd_myorders, Command("myorders"))
+    dp.message.register(cmd_order_detail, Command("order"))
     dp.message.register(on_webapp_data, F.web_app_data)
     dp.message.register(on_unknown_message)
 

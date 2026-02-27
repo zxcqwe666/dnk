@@ -81,6 +81,38 @@ async def fetch_last_orders(limit: int = 10) -> list[dict[str, Any]]:
         return [dict(row) for row in rows]
 
 
+async def fetch_user_orders(user_id: int, limit: int = 10) -> list[dict[str, Any]]:
+    async with aiosqlite.connect(DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        cursor = await db.execute(
+            """
+            SELECT id, total, created_at
+            FROM orders
+            WHERE user_id = ?
+            ORDER BY id DESC
+            LIMIT ?
+            """,
+            (user_id, limit),
+        )
+        rows = await cursor.fetchall()
+        return [dict(row) for row in rows]
+
+
+async def fetch_order_by_id(order_id: int) -> dict[str, Any] | None:
+    async with aiosqlite.connect(DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        cursor = await db.execute(
+            """
+            SELECT id, user_id, username, full_name, total, payload_json, created_at
+            FROM orders
+            WHERE id = ?
+            """,
+            (order_id,),
+        )
+        row = await cursor.fetchone()
+        return dict(row) if row else None
+
+
 async def save_user_profile(
     user_id: int,
     username: str | None,
