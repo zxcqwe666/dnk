@@ -755,13 +755,21 @@ function initProfilePanel() {
       hasError = true;
     }
 
-    // Сначала скрываем форму
-    toggleProfileForm(false);
+    // Скрываем форму
+    profileForm.classList.add("hidden");
+    profileForm.classList.remove("open");
+    profileFooter.classList.add("hidden");
+    profileFooter.classList.remove("open");
+    profileMenu.classList.remove("hidden");
     isFormOpen = false;
 
     if (hasError) {
       // Показываем форму обратно если есть ошибки
-      toggleProfileForm(true);
+      profileForm.classList.remove("hidden");
+      profileForm.classList.add("open");
+      profileFooter.classList.remove("hidden");
+      profileFooter.classList.add("open");
+      profileMenu.classList.add("hidden");
       isFormOpen = true;
       if (window.Telegram?.WebApp) {
         window.Telegram.WebApp.showAlert("Проверьте данные профиля и исправьте ошибки.");
