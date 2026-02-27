@@ -92,6 +92,21 @@ function getTelegram() {
   return window.tg || window.Telegram?.WebApp || null;
 }
 
+function sendWebAppData(payload) {
+  const tg = getTelegram();
+  if (!tg) {
+    alert("Откройте Mini App внутри Telegram.");
+    return false;
+  }
+  try {
+    tg.sendData(JSON.stringify(payload));
+    return true;
+  } catch (_) {
+    tg.showAlert("Не удалось отправить данные. Попробуйте ещё раз.");
+    return false;
+  }
+}
+
 function initQrPanel() {
   const btn = document.getElementById("qrButton");
   const panel = document.getElementById("qrPanel");
@@ -368,16 +383,14 @@ function initCartPanel() {
 
     const text = lines.join("\n");
 
-    const tg = getTelegram();
-    if (tg && tg.initData) {
-      tg.sendData(
-        JSON.stringify({
-          type: "order",
-          items: cart,
-          total,
-          profile,
-        })
-      );
+    const sent = sendWebAppData({
+      type: "order",
+      items: cart,
+      total,
+      profile,
+    });
+    if (sent) {
+      const tg = getTelegram();
       tg.showPopup({
         title: "Заказ оформлен",
         message: text,
@@ -385,8 +398,7 @@ function initCartPanel() {
       });
       setTimeout(() => {
         tg.openTelegramLink(BOT_URL);
-        tg.close();
-      }, 200);
+      }, 400);
       cart = {};
       updateCartBadge();
       renderCart();
@@ -675,7 +687,6 @@ function initProfilePanel() {
       const tg = getTelegram();
       if (tg) {
         tg.openTelegramLink(`${BOT_URL}?start=myorders`);
-        tg.close();
       } else {
         window.location.href = `${BOT_URL}?start=myorders`;
       }
