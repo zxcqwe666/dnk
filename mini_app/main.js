@@ -49,6 +49,16 @@ let profile = {
   phone: "",
 };
 
+function isProfileComplete() {
+  return (
+    profile.shoe_size &&
+    profile.clothing_size &&
+    profile.city &&
+    profile.delivery &&
+    profile.phone
+  );
+}
+
 const BY_CITIES = [
   "минск",
   "брест",
@@ -359,6 +369,22 @@ function initCartPanel() {
       return;
     }
 
+    if (!isProfileComplete()) {
+      const tg = getTelegram();
+      if (tg) {
+        tg.showAlert("Заполните личные данные перед оформлением заказа.");
+      } else {
+        alert("Заполните личные данные перед оформлением заказа.");
+      }
+      if (typeof window.setActiveTab === "function") {
+        window.setActiveTab("profile");
+      }
+      if (typeof window.openProfileForm === "function") {
+        window.openProfileForm();
+      }
+      return;
+    }
+
     const lines = [];
     let total = 0;
 
@@ -427,6 +453,11 @@ function initProfilePanel() {
   const close = document.getElementById("closeProfile");
   const save = document.getElementById("saveProfileButton");
   const myOrders = document.getElementById("myOrdersButton");
+  const editProfile = document.getElementById("editProfileButton");
+  const backToSummary = document.getElementById("backToSummaryButton");
+  const profileSummary = document.getElementById("profileSummary");
+  const profileForm = document.getElementById("profileForm");
+  const profileFooter = document.getElementById("profileFooter");
 
   const closeSearch = document.getElementById("closeSearch");
   const searchInput = document.getElementById("searchQuery");
@@ -443,6 +474,12 @@ function initProfilePanel() {
   const cityError = document.getElementById("cityError");
   const deliveryError = document.getElementById("deliveryError");
   const phoneError = document.getElementById("phoneError");
+
+  const summaryShoe = document.getElementById("summaryShoe");
+  const summaryClothing = document.getElementById("summaryClothing");
+  const summaryCity = document.getElementById("summaryCity");
+  const summaryDelivery = document.getElementById("summaryDelivery");
+  const summaryPhone = document.getElementById("summaryPhone");
 
   const setActiveTab = (tab) => {
     [tabCatalog, tabSearch, tabCart, tabProfile].forEach((btn) => {
@@ -492,8 +529,35 @@ function initProfilePanel() {
     phoneInput.value = profile.phone || "";
   };
 
+  const updateSummary = () => {
+    summaryShoe.textContent = profile.shoe_size || "Не заполнено";
+    summaryClothing.textContent = profile.clothing_size || "Не заполнено";
+    summaryCity.textContent = profile.city || "Не заполнено";
+    summaryDelivery.textContent = profile.delivery || "Не заполнено";
+    summaryPhone.textContent = profile.phone || "Не заполнено";
+  };
+
+  const toggleProfileForm = (showForm) => {
+    if (showForm) {
+      profileSummary.classList.add("hidden");
+      profileForm.classList.remove("hidden");
+      profileFooter.classList.remove("hidden");
+    } else {
+      profileSummary.classList.remove("hidden");
+      profileForm.classList.add("hidden");
+      profileFooter.classList.add("hidden");
+    }
+  };
+
+  window.openProfileForm = () => {
+    applyToInputs();
+    toggleProfileForm(true);
+  };
+
   tabProfile.onclick = () => {
     applyToInputs();
+    updateSummary();
+    toggleProfileForm(false);
     setActiveTab("profile");
   };
 
@@ -589,6 +653,20 @@ function initProfilePanel() {
     setActiveTab("catalog");
   };
 
+  if (editProfile) {
+    editProfile.onclick = () => {
+      applyToInputs();
+      toggleProfileForm(true);
+    };
+  }
+
+  if (backToSummary) {
+    backToSummary.onclick = () => {
+      updateSummary();
+      toggleProfileForm(false);
+    };
+  }
+
   closeSearch.onclick = () => {
     setActiveTab("catalog");
   };
@@ -661,6 +739,7 @@ function initProfilePanel() {
       phone,
     };
     saveProfileToStorage();
+    updateSummary();
 
     if (window.Telegram?.WebApp) {
       window.Telegram.WebApp.sendData(
@@ -676,7 +755,7 @@ function initProfilePanel() {
       });
     }
 
-    panel.classList.add("hidden");
+    toggleProfileForm(false);
   };
 
   if (myOrders) {
