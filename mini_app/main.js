@@ -937,3 +937,16 @@ document.addEventListener("DOMContentLoaded", () => {
   initProfilePanel();
 });
 
+// Глобальная функция для показа/скрытия заказов
+window.toggleOrdersDropdown = function() {
+  const el = document.getElementById("ordersContent");
+  if (!el) return;
+  
+  if (el.style.display === "none" || el.style.display === "") {
+    el.style.display = "block";
+    renderOrders();
+  } else {
+    el.style.display = "none";
+  }
+};
+
