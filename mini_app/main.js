@@ -799,27 +799,36 @@ function initProfilePanel() {
 
   // Кнопка "Мои заказы" - показывает историю заказов как выпадающий блок
   let isOrdersOpen = false;
-  if (myOrdersButton) {
-    console.log("myOrdersButton found, adding click handler");
-    myOrdersButton.onclick = () => {
-      console.log("myOrdersButton clicked, isOrdersOpen:", isOrdersOpen);
-      isOrdersOpen = !isOrdersOpen;
-      if (isOrdersOpen) {
-        renderOrders();
-        ordersContent.classList.remove("hidden");
-        ordersContent.classList.add("open");
-        // Скрываем форму личных данных
-        if (isFormOpen) {
-          isFormOpen = false;
-          toggleProfileForm(false);
-        }
-      } else {
-        ordersContent.classList.add("hidden");
-        ordersContent.classList.remove("open");
+  const ordersContentEl = document.getElementById("ordersContent");
+  
+  function toggleOrders() {
+    console.log("toggleOrders called, isOrdersOpen:", isOrdersOpen, "ordersContentEl:", ordersContentEl);
+    
+    if (!ordersContentEl) {
+      console.error("ordersContent element not found!");
+      return;
+    }
+    
+    isOrdersOpen = !isOrdersOpen;
+    
+    if (isOrdersOpen) {
+      renderOrders();
+      ordersContentEl.style.display = "block";
+      // Скрываем форму личных данных
+      if (isFormOpen) {
+        isFormOpen = false;
+        toggleProfileForm(false);
       }
-    };
+    } else {
+      ordersContentEl.style.display = "none";
+    }
+  }
+  
+  if (myOrdersButton) {
+    console.log("Attaching click handler to myOrdersButton");
+    myOrdersButton.onclick = toggleOrders;
   } else {
-    console.log("myOrdersButton not found!");
+    console.error("myOrdersButton not found!");
   }
 
   closeSearch.onclick = () => {
