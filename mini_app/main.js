@@ -802,25 +802,40 @@ function initProfilePanel() {
   const ordersContentEl = document.getElementById("ordersContent");
   
   function toggleOrders() {
-    if (!ordersContentEl) return;
-    
-    isOrdersOpen = !isOrdersOpen;
-    
-    if (isOrdersOpen) {
-      renderOrders();
-      ordersContentEl.classList.remove("hidden");
-      // Скрываем форму личных данных
-      if (isFormOpen) {
-        isFormOpen = false;
-        toggleProfileForm(false);
+    try {
+      alert("Клик!");
+      
+      if (!ordersContentEl) {
+        alert("Элемент не найден!");
+        return;
       }
-    } else {
-      ordersContentEl.classList.add("hidden");
+      
+      isOrdersOpen = !isOrdersOpen;
+      alert("isOrdersOpen=" + isOrdersOpen);
+      
+      if (isOrdersOpen) {
+        renderOrders();
+        ordersContentEl.classList.remove("hidden");
+        alert("Показываю заказы");
+        // Скрываем форму личных данных
+        if (isFormOpen) {
+          isFormOpen = false;
+          toggleProfileForm(false);
+        }
+      } else {
+        ordersContentEl.classList.add("hidden");
+        alert("Скрываю заказы");
+      }
+    } catch (e) {
+      alert("Ошибка: " + e.message);
     }
   }
   
   if (myOrdersButton) {
+    alert("Кнопка найдена, вешаю обработчик");
     myOrdersButton.onclick = toggleOrders;
+  } else {
+    alert("Кнопка НЕ найдена!");
   }
 
   closeSearch.onclick = () => {
@@ -933,6 +948,7 @@ function initProfilePanel() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  alert("JS загружен!");
   initTelegram();
   initQrPanel();
   loadProfileFromStorage();
