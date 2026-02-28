@@ -802,9 +802,8 @@ function initProfilePanel() {
   const ordersContentEl = document.getElementById("ordersContent");
   
   function toggleOrders() {
-    alert("toggleOrders: isOrdersOpen=" + isOrdersOpen + " element=" + (ordersContentEl ? "found" : "NOT FOUND"));
-    
     if (!ordersContentEl) {
+      alert("ordersContent not found!");
       return;
     }
     
@@ -812,14 +811,14 @@ function initProfilePanel() {
     
     if (isOrdersOpen) {
       renderOrders();
-      ordersContentEl.style.display = "block";
+      ordersContentEl.classList.remove("hidden");
       // Скрываем форму личных данных
       if (isFormOpen) {
         isFormOpen = false;
         toggleProfileForm(false);
       }
     } else {
-      ordersContentEl.style.display = "none";
+      ordersContentEl.classList.add("hidden");
     }
   }
   
