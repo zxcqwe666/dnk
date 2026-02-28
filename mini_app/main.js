@@ -540,10 +540,17 @@ function initProfilePanel() {
   const ordersPanel = document.getElementById("ordersPanel");
 
   const close = document.getElementById("closeProfile");
+  if (close) {
+    close.onclick = () => {
+      panel.classList.add("hidden");
+      ordersPanel.classList.add("hidden");
+    };
+  }
   const save = document.getElementById("saveProfileButton");
   const personalDataButton = document.getElementById("personalDataButton");
   const myOrdersButton = document.getElementById("myOrdersButton");
   const profileMenu = document.getElementById("profileMenu");
+  const ordersContent = document.getElementById("ordersContent");
   const profileForm = document.getElementById("profileForm");
   const profileFooter = document.getElementById("profileFooter");
 
@@ -577,6 +584,7 @@ function initProfilePanel() {
     panel.classList.add("hidden");
     searchPanel.classList.add("hidden");
     cartPanel.classList.add("hidden");
+    ordersPanel.classList.add("hidden");
 
     if (tab === "catalog") {
       tabCatalog.classList.add("bottom-nav-item--active");
@@ -657,6 +665,12 @@ function initProfilePanel() {
     profileForm.classList.remove("open");
     profileFooter.classList.add("hidden");
     profileFooter.classList.remove("open");
+    ordersPanel.classList.add("hidden");
+    if (ordersContent) {
+      ordersContent.classList.add("hidden");
+      ordersContent.classList.remove("open");
+    }
+    isOrdersOpen = false;
   };
 
   window.openProfileForm = () => {
@@ -771,17 +785,36 @@ function initProfilePanel() {
       if (isFormOpen) {
         applyToInputs();
         toggleProfileForm(true);
+        // Скрываем заказы если открыты
+        if (isOrdersOpen) {
+          isOrdersOpen = false;
+          ordersContent.classList.add("hidden");
+          ordersContent.classList.remove("open");
+        }
       } else {
         toggleProfileForm(false);
       }
     };
   }
 
-  // Кнопка "Мои заказы" - показывает историю заказов
+  // Кнопка "Мои заказы" - показывает историю заказов как выпадающий блок
+  let isOrdersOpen = false;
   if (myOrdersButton) {
     myOrdersButton.onclick = () => {
-      renderOrders();
-      ordersPanel.classList.remove("hidden");
+      isOrdersOpen = !isOrdersOpen;
+      if (isOrdersOpen) {
+        renderOrders();
+        ordersContent.classList.remove("hidden");
+        ordersContent.classList.add("open");
+        // Скрываем форму личных данных
+        if (isFormOpen) {
+          isFormOpen = false;
+          toggleProfileForm(false);
+        }
+      } else {
+        ordersContent.classList.add("hidden");
+        ordersContent.classList.remove("open");
+      }
     };
   }
 
@@ -789,13 +822,8 @@ function initProfilePanel() {
     setActiveTab("catalog");
   };
 
-  if (closeOrders) {
-    closeOrders.onclick = () => {
-      profileMenu.classList.remove("hidden");
-      ordersPanel.classList.add("hidden");
-    };
-  }
-
+  // Закрытие заказов - больше не используется, так как заказы в выпадающем блоке
+  
   searchInput.addEventListener("input", (e) => {
     renderSearchResults(e.target.value);
   });
