@@ -802,10 +802,9 @@ function initProfilePanel() {
   const ordersContentEl = document.getElementById("ordersContent");
   
   function toggleOrders() {
-    console.log("toggleOrders called, isOrdersOpen:", isOrdersOpen, "ordersContentEl:", ordersContentEl);
+    alert("toggleOrders: isOrdersOpen=" + isOrdersOpen + " element=" + (ordersContentEl ? "found" : "NOT FOUND"));
     
     if (!ordersContentEl) {
-      console.error("ordersContent element not found!");
       return;
     }
     
@@ -825,10 +824,7 @@ function initProfilePanel() {
   }
   
   if (myOrdersButton) {
-    console.log("Attaching click handler to myOrdersButton");
     myOrdersButton.onclick = toggleOrders;
-  } else {
-    console.error("myOrdersButton not found!");
   }
 
   closeSearch.onclick = () => {
