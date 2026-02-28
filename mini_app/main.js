@@ -800,7 +800,9 @@ function initProfilePanel() {
   // Кнопка "Мои заказы" - показывает историю заказов как выпадающий блок
   let isOrdersOpen = false;
   if (myOrdersButton) {
+    console.log("myOrdersButton found, adding click handler");
     myOrdersButton.onclick = () => {
+      console.log("myOrdersButton clicked, isOrdersOpen:", isOrdersOpen);
       isOrdersOpen = !isOrdersOpen;
       if (isOrdersOpen) {
         renderOrders();
@@ -816,6 +818,8 @@ function initProfilePanel() {
         ordersContent.classList.remove("open");
       }
     };
+  } else {
+    console.log("myOrdersButton not found!");
   }
 
   closeSearch.onclick = () => {
