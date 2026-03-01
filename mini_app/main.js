@@ -1,4 +1,4 @@
-const BOT_URL = "https://t.me/dnkstock_bot";
+const BOT_URL = "https://t.me/dnkstock_bot/dnk";
 
 const CATALOG = {
   sneakers: [
