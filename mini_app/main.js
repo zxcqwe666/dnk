@@ -95,8 +95,8 @@ function initTelegram() {
   window.tg = tg;
   tg.ready();
   tg.expand();
-  tg.setHeaderColor("#0f1115");
-  tg.setBackgroundColor("#050509");
+  if (tg.setHeaderColor) tg.setHeaderColor("#0f1115");
+  if (tg.setBackgroundColor) tg.setBackgroundColor("#050509");
 }
 
 function getTelegram() {
@@ -269,7 +269,7 @@ function renderProducts(categoryId) {
     button.onclick = () => {
       cart[p.id] = (cart[p.id] || 0) + 1;
       updateCartBadge();
-      if (window.Telegram?.WebApp) {
+      if (window.Telegram?.WebApp?.HapticFeedback) {
         window.Telegram.WebApp.HapticFeedback.impactOccurred("medium");
       }
     };
@@ -521,11 +521,14 @@ function initCartPanel() {
       });
       
       const tg = getTelegram();
-      tg.showPopup({
-        title: "Заказ оформлен",
-        message: text,
-        buttons: [{ id: "ok", type: "default", text: "OK" }],
-      });
+      if (tg && tg.showAlert) {
+        tg.showAlert(
+          "Заказ оформлен!\n\n" +
+          text
+        );
+      } else if (tg && tg.close) {
+        tg.close();
+      }
       cart = {};
       updateCartBadge();
       renderCart();
@@ -753,7 +756,7 @@ function initProfilePanel() {
       button.onclick = () => {
         cart[p.id] = (cart[p.id] || 0) + 1;
         updateCartBadge();
-        if (window.Telegram?.WebApp) {
+        if (window.Telegram?.WebApp?.HapticFeedback) {
           window.Telegram.WebApp.HapticFeedback.impactOccurred("medium");
         }
       };
@@ -840,6 +843,12 @@ function initProfilePanel() {
   let isAdminOrdersOpen = false;
 
   function checkIsAdmin() {
+    // Проверяем URL параметр ?admin=1 для тестирования
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("admin") === "1") {
+      return true;
+    }
+    
     const tg = getTelegram();
     console.log("Checking admin, tg:", tg);
     console.log("initDataUnsafe:", tg ? tg.initDataUnsafe : null);
@@ -849,8 +858,7 @@ function initProfilePanel() {
       return userId === ADMIN_ID;
     }
     console.log("Not in Telegram or no user data");
-    // Для тестирования показываем кнопку всегда
-    return true;
+    return false;
   }
 
   function renderAdminOrders() {
