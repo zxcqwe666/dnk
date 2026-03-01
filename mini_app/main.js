@@ -116,7 +116,7 @@ function sendWebAppData(payload) {
     return true;
   } catch (e) {
     console.error("Failed to send order data:", e);
-    tg.showAlert("Не удалось отправить данные. Попробуйте ещё раз.");
+    alert("Не удалось отправить данные. Попробуйте ещё раз.");
     return false;
   }
 }
@@ -1015,7 +1015,7 @@ function initProfilePanel() {
       profileMenu.classList.add("hidden");
       isFormOpen = true;
       if (window.Telegram?.WebApp) {
-        window.Telegram.WebApp.showAlert("Проверьте данные профиля и исправьте ошибки.");
+        alert("Проверьте данные профиля и исправьте ошибки.");
       } else {
         alert("Проверьте данные профиля и исправьте ошибки.");
       }
