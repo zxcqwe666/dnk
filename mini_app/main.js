@@ -109,9 +109,12 @@ function sendWebAppData(payload) {
     return false;
   }
   try {
+    console.log("Sending order data to bot:", payload);
     tg.sendData(JSON.stringify(payload));
+    console.log("Order data sent successfully");
     return true;
-  } catch (_) {
+  } catch (e) {
+    console.error("Failed to send order data:", e);
     tg.showAlert("Не удалось отправить данные. Попробуйте ещё раз.");
     return false;
   }

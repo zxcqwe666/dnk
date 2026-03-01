@@ -372,7 +372,9 @@ async def on_webapp_data(message: Message) -> None:
 
     try:
         payload: dict[str, Any] = json.loads(message.web_app_data.data)
-    except Exception:
+        print(f"[DEBUG] Received web app data: {payload}")  # Отладочный вывод
+    except Exception as e:
+        print(f"[ERROR] Failed to parse web app data: {e}")  # Отладочный вывод
         await message.answer("Не удалось прочитать данные заказа.")
         return
 
