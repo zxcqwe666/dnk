@@ -161,6 +161,21 @@
             <span class="menu-text">Мои заказы</span>
             <span class="menu-arrow">→</span>
           </button>
+
+          <!-- Админ-панель -->
+          <button id="adminPanelButton" class="menu-button admin-button hidden">
+            <span class="menu-icon">⚙️</span>
+            <span class="menu-text">Админ-панель</span>
+            <span class="menu-arrow">→</span>
+          </button>
+
+          <!-- Блок всех заказов (для админа) -->
+          <div id="adminOrdersContent" class="profile-body hidden">
+            <div id="adminOrdersEmpty" class="empty-state hidden">
+              Заказов пока нет.
+            </div>
+            <div id="adminOrdersList" class="orders-list"></div>
+          </div>
         </div>
 
         <!-- Форма личных данных -->

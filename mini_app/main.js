@@ -1,4 +1,5 @@
 const BOT_URL = "https://t.me/dnkstock_bot/dnk";
+const ADMIN_ID = 957766610;
 
 const CATALOG = {
   sneakers: [
@@ -180,6 +181,18 @@ function addOrderToStorage(order) {
   const orders = loadOrdersFromStorage();
   orders.unshift(order);
   saveOrdersToStorage(orders);
+  
+  // Также сохраняем в общий список для админа
+  try {
+    const allRaw = localStorage.getItem("dnk_all_orders");
+    const allOrders = allRaw ? JSON.parse(allRaw) : [];
+    allOrders.unshift(order);
+    // Храним только последние 100 заказов
+    if (allOrders.length > 100) {
+      allOrders.length = 100;
+    }
+    localStorage.setItem("dnk_all_orders", JSON.stringify(allOrders));
+  } catch (_) {}
 }
 
 function normalizePhone(raw) {
@@ -818,6 +831,109 @@ function initProfilePanel() {
   if (myOrdersButton) {
     myOrdersButton.onclick = toggleOrders;
   }
+
+  // Админ-панель: показываем кнопку если пользователь - админ
+  const adminPanelButton = document.getElementById("adminPanelButton");
+  const adminOrdersContent = document.getElementById("adminOrdersContent");
+  const adminOrdersEmpty = document.getElementById("adminOrdersEmpty");
+  const adminOrdersList = document.getElementById("adminOrdersList");
+  let isAdminOrdersOpen = false;
+
+  function checkIsAdmin() {
+    const tg = getTelegram();
+    if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+      return tg.initDataUnsafe.user.id === ADMIN_ID;
+    }
+    return false;
+  }
+
+  function renderAdminOrders() {
+    const allOrders = loadAllOrdersFromStorage();
+    adminOrdersList.innerHTML = "";
+    
+    if (allOrders.length === 0) {
+      if (adminOrdersEmpty) adminOrdersEmpty.classList.remove("hidden");
+      return;
+    }
+    
+    if (adminOrdersEmpty) adminOrdersEmpty.classList.add("hidden");
+    
+    allOrders.forEach(order => {
+      const card = document.createElement("div");
+      card.className = "order-card admin-order-card";
+      
+      const header = document.createElement("div");
+      header.className = "order-header";
+      
+      const id = document.createElement("span");
+      id.className = "order-id";
+      id.textContent = "#" + order.id;
+      
+      const date = document.createElement("span");
+      date.className = "order-date";
+      date.textContent = order.created_at ? order.created_at.slice(0, 10) : "";
+      
+      header.appendChild(id);
+      header.appendChild(date);
+      
+      const total = document.createElement("div");
+      total.className = "order-total";
+      total.textContent = formatPrice(order.total);
+      
+      const items = document.createElement("div");
+      items.className = "order-items";
+      items.textContent = order.items_summary || "";
+
+      const userInfo = document.createElement("div");
+      userInfo.className = "order-user";
+      if (order.profile) {
+        userInfo.textContent = `📱 ${order.profile.phone || "-"} | ${order.profile.city || "-"}`;
+      }
+      
+      card.appendChild(header);
+      card.appendChild(total);
+      card.appendChild(items);
+      card.appendChild(userInfo);
+      
+      adminOrdersList.appendChild(card);
+    });
+  }
+
+  function loadAllOrdersFromStorage() {
+    // Загружаем все заказы из localStorage
+    // Пока используем localStorage, позже можно добавить API
+    try {
+      const raw = localStorage.getItem("dnk_all_orders");
+      if (!raw) return [];
+      return JSON.parse(raw);
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function toggleAdminOrders() {
+    isAdminOrdersOpen = !isAdminOrdersOpen;
+    
+    if (isAdminOrdersOpen) {
+      renderAdminOrders();
+      adminOrdersContent.classList.remove("hidden");
+    } else {
+      adminOrdersContent.classList.add("hidden");
+    }
+  }
+
+  // Показываем админ-панель если пользователь - админ
+  if (adminPanelButton && checkIsAdmin()) {
+    adminPanelButton.classList.remove("hidden");
+    adminPanelButton.onclick = toggleAdminOrders;
+  }
+
+  // Функция для сохранения всех заказов (для синхронизации)
+  window.saveAllOrders = function(orders) {
+    try {
+      localStorage.setItem("dnk_all_orders", JSON.stringify(orders));
+    } catch (_) {}
+  };
 
   closeSearch.onclick = () => {
     setActiveTab("catalog");
