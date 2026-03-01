@@ -163,17 +163,20 @@ function getTelegram() {
 function sendWebAppData(payload) {
   const tg = getTelegram();
   if (!tg) {
-    alert("Откройте Mini App внутри Telegram.");
+    alert("❌ Ошибка: Mini App должна быть открыта в Telegram\n\nПопробуйте:\n1. Закрыть это окно\n2. Нажать кнопку 'Открыть магазин' в боте снова");
     return false;
   }
   try {
     console.log("Sending order data to bot:", payload);
     tg.sendData(JSON.stringify(payload));
     console.log("Order data sent successfully");
+    
+    // Визуальное подтверждение
+    alert("✅ Заказ отправлен!\n\nПроверьте сообщения в боте - должен прийти ответ с номером заказа.");
     return true;
   } catch (e) {
     console.error("Failed to send order data:", e);
-    alert("Не удалось отправить данные. Попробуйте ещё раз.");
+    alert(`❌ Ошибка отправки заказа:\n\n${e.message}\n\nПопробуйте ещё раз или напишите менеджеру.`);
     return false;
   }
 }
