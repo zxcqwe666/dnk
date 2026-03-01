@@ -367,9 +367,13 @@ async def on_unknown_message(message: Message) -> None:
 
 
 async def on_webapp_data(message: Message) -> None:
+    print(f"[DEBUG] on_webapp_data called, message: {message}")  # Отладочный вывод
     if not message.web_app_data:
+        print("[DEBUG] No web_app_data in message")  # Отладочный вывод
         return
 
+    print(f"[DEBUG] web_app_data: {message.web_app_data}")  # Отладочный вывод
+    
     try:
         payload: dict[str, Any] = json.loads(message.web_app_data.data)
         print(f"[DEBUG] Received web app data: {payload}")  # Отладочный вывод
@@ -593,7 +597,7 @@ async def main() -> None:
     dp.message.register(cmd_orders, Command("orders"))
     dp.message.register(cmd_myorders, Command("myorders"))
     dp.message.register(cmd_order_detail, Command("order"))
-    dp.message.register(on_webapp_data, F.web_app_data)
+    dp.message.register(on_webapp_data, F.message.web_app_data)
     dp.message.register(on_unknown_message)
 
     dp.callback_query.register(on_main_menu, F.data == "back:main")
