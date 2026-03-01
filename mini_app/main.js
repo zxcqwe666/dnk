@@ -942,11 +942,11 @@ window.toggleOrdersDropdown = function() {
   const el = document.getElementById("ordersContent");
   if (!el) return;
   
-  if (el.style.display === "none" || el.style.display === "") {
-    el.style.display = "block";
+  if (el.classList.contains("hidden")) {
+    el.classList.remove("hidden");
     renderOrders();
   } else {
-    el.style.display = "none";
+    el.classList.add("hidden");
   }
 };
 
