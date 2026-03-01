@@ -521,12 +521,9 @@ function initCartPanel() {
       });
       
       const tg = getTelegram();
-      if (tg && tg.showAlert) {
-        tg.showAlert(
-          "Заказ оформлен!\n\n" +
-          text
-        );
-      } else if (tg && tg.close) {
+      // Используем нативный alert так как showAlert не работает в v6
+      alert("Заказ оформлен!\n\n" + text);
+      if (tg && tg.close) {
         tg.close();
       }
       cart = {};
