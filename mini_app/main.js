@@ -269,9 +269,6 @@ function renderProducts(categoryId) {
     button.onclick = () => {
       cart[p.id] = (cart[p.id] || 0) + 1;
       updateCartBadge();
-      if (window.Telegram?.WebApp?.HapticFeedback) {
-        window.Telegram.WebApp.HapticFeedback.impactOccurred("medium");
-      }
     };
 
     footer.appendChild(price);
@@ -748,9 +745,6 @@ function initProfilePanel() {
       button.onclick = () => {
         cart[p.id] = (cart[p.id] || 0) + 1;
         updateCartBadge();
-        if (window.Telegram?.WebApp?.HapticFeedback) {
-          window.Telegram.WebApp.HapticFeedback.impactOccurred("medium");
-        }
       };
 
       footer.appendChild(price);
