@@ -1,6 +1,63 @@
 const BOT_URL = "https://t.me/dnkstock_bot/dnk";
 const ADMIN_ID = 957766610;
 
+// Supabase настройки
+const SUPABASE_URL = "https://uobhzpqzqybhfcdberky.supabase.co";
+const SUPABASE_KEY = "sb_publishable_wbMNPJ4s_fiyHDR_TrxcDg_w_sbaHcH";
+
+// Функция для сохранения заказа в Supabase
+async function saveOrderToSupabase(order) {
+  try {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+      },
+      body: JSON.stringify({
+        user_id: order.user_id,
+        username: order.username,
+        full_name: order.full_name,
+        items: order.items,
+        total: order.total,
+        profile: order.profile,
+        items_summary: order.items_summary,
+      }),
+    });
+    if (!response.ok) {
+      console.error("Failed to save order to Supabase:", await response.text());
+    }
+    return await response.json();
+  } catch (e) {
+    console.error("Error saving to Supabase:", e);
+    return null;
+  }
+}
+
+// Функция для загрузки всех заказов из Supabase
+async function fetchAllOrdersFromSupabase() {
+  try {
+    const response = await fetch(
+      `${SUPABASE_URL}/rest/v1/orders?order=created_at.desc&limit=100`,
+      {
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`,
+        },
+      }
+    );
+    if (!response.ok) {
+      console.error("Failed to fetch orders:", await response.text());
+      return [];
+    }
+    return await response.json();
+  } catch (e) {
+    console.error("Error fetching from Supabase:", e);
+    return [];
+  }
+}
+
 const CATALOG = {
   sneakers: [
     {
@@ -181,6 +238,22 @@ function addOrderToStorage(order) {
   const orders = loadOrdersFromStorage();
   orders.unshift(order);
   saveOrdersToStorage(orders);
+  
+  // Сохраняем в Supabase
+  const tg = getTelegram();
+  const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null;
+  const username = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.username : null;
+  const fullName = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : null;
+  
+  saveOrderToSupabase({
+    user_id: userId,
+    username: username,
+    full_name: fullName,
+    items: order.items,
+    total: order.total,
+    profile: order.profile,
+    items_summary: order.items_summary,
+  });
   
   // Также сохраняем в общий список для админа
   try {
@@ -847,8 +920,8 @@ function initProfilePanel() {
     return false;
   }
 
-  function renderAdminOrders() {
-    const allOrders = loadAllOrdersFromStorage();
+  async function renderAdminOrders() {
+    const allOrders = await loadAllOrdersFromStorage();
     adminOrdersList.innerHTML = "";
     
     if (allOrders.length === 0) {
@@ -899,23 +972,16 @@ function initProfilePanel() {
     });
   }
 
-  function loadAllOrdersFromStorage() {
-    // Загружаем все заказы из localStorage
-    // Пока используем localStorage, позже можно добавить API
-    try {
-      const raw = localStorage.getItem("dnk_all_orders");
-      if (!raw) return [];
-      return JSON.parse(raw);
-    } catch (_) {
-      return [];
-    }
+  async function loadAllOrdersFromStorage() {
+    // Загружаем из Supabase
+    return await fetchAllOrdersFromSupabase();
   }
 
-  function toggleAdminOrders() {
+  async function toggleAdminOrders() {
     isAdminOrdersOpen = !isAdminOrdersOpen;
     
     if (isAdminOrdersOpen) {
-      renderAdminOrders();
+      await renderAdminOrders();
       adminOrdersContent.classList.remove("hidden");
     } else {
       adminOrdersContent.classList.add("hidden");
