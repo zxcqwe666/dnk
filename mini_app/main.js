@@ -841,10 +841,16 @@ function initProfilePanel() {
 
   function checkIsAdmin() {
     const tg = getTelegram();
+    console.log("Checking admin, tg:", tg);
+    console.log("initDataUnsafe:", tg ? tg.initDataUnsafe : null);
     if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
-      return tg.initDataUnsafe.user.id === ADMIN_ID;
+      const userId = tg.initDataUnsafe.user.id;
+      console.log("User ID:", userId, "Admin ID:", ADMIN_ID);
+      return userId === ADMIN_ID;
     }
-    return false;
+    console.log("Not in Telegram or no user data");
+    // Для тестирования показываем кнопку всегда
+    return true;
   }
 
   function renderAdminOrders() {
