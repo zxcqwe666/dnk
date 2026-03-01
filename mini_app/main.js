@@ -458,12 +458,7 @@ function initCartPanel() {
     }
 
     if (!isProfileComplete()) {
-      const tg = getTelegram();
-      if (tg) {
-        tg.showAlert("Заполните личные данные перед оформлением заказа.");
-      } else {
-        alert("Заполните личные данные перед оформлением заказа.");
-      }
+      alert("Заполните личные данные перед оформлением заказа.");
       if (typeof window.setActiveTab === "function") {
         window.setActiveTab("profile");
       }
