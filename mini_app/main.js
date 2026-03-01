@@ -1039,11 +1039,7 @@ function initProfilePanel() {
           profile,
         })
       );
-      window.Telegram.WebApp.showPopup({
-        title: "Профиль сохранён",
-        message: "Мы будем подставлять эти данные в заказы.",
-        buttons: [{ id: "ok", type: "default", text: "OK" }],
-      });
+      alert("Профиль сохранён. Мы будем подставлять эти данные в заказы.");
     }
   };
 
