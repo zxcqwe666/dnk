@@ -23,12 +23,13 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from dotenv import load_dotenv
 
 from db import (
-    fetch_last_orders,
-    fetch_order_by_id,
-    fetch_user_orders,
-    init_db,
-    save_order,
+    fetch_last_orders, 
+    init_db, 
+    save_order, 
     save_user_profile,
+    update_order_status,
+    get_order_status_history,
+    fetch_orders_by_status
 )
 
 
@@ -369,12 +370,10 @@ async def on_unknown_message(message: Message) -> None:
 async def on_webapp_data(message: Message) -> None:
     print(f"[DEBUG] on_webapp_data called, message type: {message.content_type}")  # Отладочный вывод
     print(f"[DEBUG] message: {message}")  # Отладочный вывод
-    if not message.web_app_data:
-        print("[DEBUG] No web_app_data in message")  # Отладочный вывод
-        return
-
-    print(f"[DEBUG] web_app_data: {message.web_app_data}")  # Отладочный вывод
-    print(f"[DEBUG] web_app_data.data: {message.web_app_data.data}")  # Отладочный вывод
+    try:
+        payload: dict[str, Any] = json.loads(message.web_app_data.data)
+        print(f"[DEBUG] web_app_data: {message.web_app_data}")  # Отладочный вывод
+        print(f"[DEBUG] web_app_data.data: {message.web_app_data.data}")  # Отладочный вывод
     except Exception as e:
         print(f"[ERROR] Failed to parse web app data: {e}")  # Отладочный вывод
         await message.answer("Не удалось прочитать данные заказа.")
@@ -581,6 +580,93 @@ async def cmd_order_detail(message: Message) -> None:
     await message.answer("\n".join(lines))
 
 
+async def cmd_set_status(message: Message) -> None:
+    """Установить статус заказа (только для админа)"""
+    if ADMIN_ID and message.from_user.id != ADMIN_ID:
+        await message.answer("Команда доступна только администратору.")
+        return
+
+    parts = message.text.split(maxsplit=2)
+    if len(parts) < 3:
+        await message.answer("Используйте формат: /setstatus <order_id> <status>\nСтатусы: new, processing, shipped, delivered, cancelled")
+        return
+
+    order_id = parts[1].strip()
+    status = parts[2].strip()
+    
+    valid_statuses = ['new', 'processing', 'shipped', 'delivered', 'cancelled']
+    if status not in valid_statuses:
+        await message.answer(f"Неверный статус. Доступные: {', '.join(valid_statuses)}")
+        return
+
+    try:
+        order_id = int(order_id)
+        success = await update_order_status(order_id, status)
+        if success:
+            await message.answer(f"✅ Статус заказа #{order_id} изменен на '{status}'")
+        else:
+            await message.answer(f"❌ Заказ #{order_id} не найден")
+    except ValueError:
+        await message.answer("❌ Неверный формат ID заказа")
+
+
+async def cmd_status_orders(message: Message) -> None:
+    """Показать заказы по статусу (только для админа)"""
+    if ADMIN_ID and message.from_user.id != ADMIN_ID:
+        await message.answer("Команда доступна только администратору.")
+        return
+
+    parts = message.text.split(maxsplit=1)
+    if len(parts) < 2:
+        await message.answer("Используйте формат: /status <status>\nСтатусы: new, processing, shipped, delivered, cancelled")
+        return
+
+    status = parts[1].strip()
+    orders = await fetch_orders_by_status(status, limit=20)
+    
+    if not orders:
+        await message.answer(f"Заказов со статусом '{status}' нет")
+        return
+
+    lines = [f"Заказы со статусом '{status}':\n"]
+    for o in orders:
+        user = o.get("username") or o.get("full_name") or o["user_id"]
+        tracking = f" | 📦 {o['tracking_number']}" if o.get('tracking_number') else ""
+        lines.append(f"#{o['id']} — {format_price(o['total'])} — {user}{tracking}")
+    
+    await message.answer("\n".join(lines))
+
+
+async def cmd_order_history(message: Message) -> None:
+    """Показать историю статусов заказа (только для админа)"""
+    if ADMIN_ID and message.from_user.id != ADMIN_ID:
+        await message.answer("Команда доступна только администратору.")
+        return
+
+    parts = message.text.split(maxsplit=1)
+    if len(parts) < 2:
+        await message.answer("Используйте формат: /history <order_id>")
+        return
+
+    try:
+        order_id = int(parts[1].strip())
+        history = await get_order_status_history(order_id)
+        
+        if not history:
+            await message.answer(f"История для заказа #{order_id} не найдена")
+            return
+
+        lines = [f"История статусов заказа #{order_id}:\n"]
+        for h in history:
+            old = f"из '{h['old_status']}'" if h['old_status'] else ""
+            comment = f" | {h['comment']}" if h['comment'] else ""
+            lines.append(f"{h['created_at']}: {old} → '{h['new_status']}'{comment}")
+        
+        await message.answer("\n".join(lines))
+    except ValueError:
+        await message.answer("❌ Неверный формат ID заказа")
+
+
 async def main() -> None:
     bot = Bot(
         token=API_TOKEN,
@@ -595,7 +681,10 @@ async def main() -> None:
     dp.message.register(cmd_orders, Command("orders"))
     dp.message.register(cmd_myorders, Command("myorders"))
     dp.message.register(cmd_order_detail, Command("order"))
-    dp.message.register(on_webapp_data, F.message.web_app_data)
+    dp.message.register(cmd_set_status, Command("setstatus"))
+    dp.message.register(cmd_status_orders, Command("status"))
+    dp.message.register(cmd_order_history, Command("history"))
+    dp.message.register(on_webapp_data, F.web_app_data)
     dp.message.register(on_unknown_message)
 
     dp.callback_query.register(on_main_menu, F.data == "back:main")
