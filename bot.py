@@ -383,6 +383,28 @@ async def debug_all_messages(message: Message) -> None:
         f.write(f"Message: {message}\n")
         if hasattr(message, 'web_app_data') and message.web_app_data:
             f.write(f"WebApp data: {message.web_app_data.data}\n")
+            # Если это WebApp данные, обрабатываем их
+            asyncio.create_task(process_webapp_data(message))
+        else:
+            f.write("No WebApp data\n")
+
+
+async def process_webapp_data(message: Message) -> None:
+    """Обработка WebApp данных"""
+    if not hasattr(message, 'web_app_data') or not message.web_app_data:
+        return
+    
+    print(f"[WEBAPP] Received WebApp data!")
+    try:
+        payload: dict[str, Any] = json.loads(message.web_app_data.data)
+        print(f"[WEBAPP] Payload: {payload}")
+        
+        # Здесь будет обработка заказа...
+        await message.answer("✅ Заказ получен! Номер заказа: #123")
+        
+    except Exception as e:
+        print(f"[WEBAPP] Error: {e}")
+        await message.answer("❌ Ошибка обработки заказа")
 
 
 async def on_webapp_data(message: Message) -> None:
