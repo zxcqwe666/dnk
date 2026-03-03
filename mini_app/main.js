@@ -657,11 +657,12 @@ function initProfilePanel() {
   const deliveryError = document.getElementById("deliveryError");
   const phoneError = document.getElementById("phoneError");
 
-  const summaryShoe = document.getElementById("summaryShoe");
-  const summaryClothing = document.getElementById("summaryClothing");
-  const summaryCity = document.getElementById("summaryCity");
-  const summaryDelivery = document.getElementById("summaryDelivery");
-  const summaryPhone = document.getElementById("summaryPhone");
+  // Убираем несуществующие элементы
+  // const summaryShoe = document.getElementById("summaryShoe");
+  // const summaryClothing = document.getElementById("summaryClothing");
+  // const summaryCity = document.getElementById("summaryCity");
+  // const summaryDelivery = document.getElementById("summaryDelivery");
+  // const summaryPhone = document.getElementById("summaryPhone");
 
   const setActiveTab = (tab) => {
     [tabCatalog, tabSearch, tabCart, tabProfile].forEach((btn) => {
@@ -713,11 +714,12 @@ function initProfilePanel() {
   };
 
   const updateSummary = () => {
-    summaryShoe.textContent = profile.shoe_size || "Не заполнено";
-    summaryClothing.textContent = profile.clothing_size || "Не заполнено";
-    summaryCity.textContent = profile.city || "Не заполнено";
-    summaryDelivery.textContent = profile.delivery || "Не заполнено";
-    summaryPhone.textContent = profile.phone || "Не заполнено";
+    // Убираем обновление несуществующих элементов
+    // summaryShoe.textContent = profile.shoe_size || "Не заполнено";
+    // summaryClothing.textContent = profile.clothing_size || "Не заполнено";
+    // summaryCity.textContent = profile.city || "Не заполнено";
+    // summaryDelivery.textContent = profile.delivery || "Не заполнено";
+    // summaryPhone.textContent = profile.phone || "Не заполнено";
   };
 
   const toggleProfileForm = (showForm) => {
