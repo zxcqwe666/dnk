@@ -459,12 +459,14 @@ async def process_webapp_data(message: Message) -> None:
                 return
             
             # Сохранение заказа
+            print(f"[WEBAPP] Saving order...")
             order_id = await save_order(
                 user_id=user.id,
                 username=user.username,
                 full_name=user.full_name,
                 payload=payload,
             )
+            print(f"[WEBAPP] Order saved with ID: {order_id}")
 
             total = int(payload.get("total", 0))
             await message.answer(
