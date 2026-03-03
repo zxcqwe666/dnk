@@ -161,11 +161,19 @@ function getTelegram() {
 }
 
 function sendWebAppData(payload) {
-  const tg = getTelegram();
+  // Используем прямой доступ как в тестовом WebApp
+  const tg = window.Telegram.WebApp;
+  
   if (!tg) {
-    alert("❌ Ошибка: Mini App должна быть открыта в Telegram\n\nПопробуйте:\n1. Закрыть это окно\n2. Нажать кнопку 'Открыть магазин' в боте снова");
+    alert("❌ Ошибка: Telegram WebApp не найден\n\nУбедитесь, что приложение открыто из Telegram");
     return false;
   }
+  
+  if (!tg.sendData) {
+    alert("❌ Ошибка: метод sendData не доступен\n\nВозможно, устаревшая версия Telegram");
+    return false;
+  }
+  
   try {
     console.log("Sending order data to bot:", payload);
     tg.sendData(JSON.stringify(payload));
