@@ -2,18 +2,18 @@ const BOT_URL = "https://t.me/dnkstock_bot/dnk";
 const ADMIN_ID = 957766610;
 
 // Supabase настройки
-const // SUPABASE_URL = "https://uobhzpqzqybhfcdberky.supabase.co";
-const // SUPABASE_KEY = "sb_publishable_wbMNPJ4s_fiyHDR_TrxcDg_w_sbaHcH";
+const SUPABASE_URL = "https://uobhzpqzqybhfcdberky.supabase.co";
+const SUPABASE_KEY = "sb_publishable_wbMNPJ4s_fiyHDR_TrxcDg_w_sbaHcH";
 
 // Функция для сохранения заказа в Supabase
 async function saveOrderToSupabase(order) {
   try {
-    const response = await fetch(`${// SUPABASE_URL}/rest/v1/orders`, {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "apikey": // SUPABASE_KEY,
-        "Authorization": `Bearer ${// SUPABASE_KEY}`,
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
       },
       body: JSON.stringify({
         user_id: order.user_id,
@@ -39,11 +39,11 @@ async function saveOrderToSupabase(order) {
 async function fetchAllOrdersFromSupabase() {
   try {
     const response = await fetch(
-      `${// SUPABASE_URL}/rest/v1/orders?order=created_at.desc&limit=100`,
+      `${SUPABASE_URL}/rest/v1/orders?order=created_at.desc&limit=100`,
       {
         headers: {
-          "apikey": // SUPABASE_KEY,
-          "Authorization": `Bearer ${// SUPABASE_KEY}`,
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`,
         },
       }
     );
@@ -162,18 +162,10 @@ function getTelegram() {
 
 function sendWebAppData(payload) {
   const tg = getTelegram();
-  console.log("Telegram WebApp object:", tg);
-  
   if (!tg) {
-    alert("❌ Ошибка: Telegram WebApp не найден\n\nУбедитесь, что приложение открыто из Telegram");
+    alert("❌ Ошибка: Mini App должна быть открыта в Telegram\n\nПопробуйте:\n1. Закрыть это окно\n2. Нажать кнопку 'Открыть магазин' в боте снова");
     return false;
   }
-  
-  if (!tg.sendData) {
-    alert("❌ Ошибка: метод sendData не доступен\n\nВозможно, устаревшая версия Telegram");
-    return false;
-  }
-  
   try {
     console.log("Sending order data to bot:", payload);
     tg.sendData(JSON.stringify(payload));
@@ -592,7 +584,7 @@ function initCartPanel() {
       
       const tg = getTelegram();
       // Используем нативный alert так как showAlert не работает в v6
-      alert("Заказ оформлен!\n\nНомер заказа будет в сообщении бота.");
+      alert("Заказ оформлен!\n\n" + text);
       if (tg && tg.close) {
         tg.close();
       }
@@ -657,12 +649,11 @@ function initProfilePanel() {
   const deliveryError = document.getElementById("deliveryError");
   const phoneError = document.getElementById("phoneError");
 
-  // Убираем несуществующие элементы
-  // const summaryShoe = document.getElementById("summaryShoe");
-  // const summaryClothing = document.getElementById("summaryClothing");
-  // const summaryCity = document.getElementById("summaryCity");
-  // const summaryDelivery = document.getElementById("summaryDelivery");
-  // const summaryPhone = document.getElementById("summaryPhone");
+  const summaryShoe = document.getElementById("summaryShoe");
+  const summaryClothing = document.getElementById("summaryClothing");
+  const summaryCity = document.getElementById("summaryCity");
+  const summaryDelivery = document.getElementById("summaryDelivery");
+  const summaryPhone = document.getElementById("summaryPhone");
 
   const setActiveTab = (tab) => {
     [tabCatalog, tabSearch, tabCart, tabProfile].forEach((btn) => {
@@ -714,12 +705,11 @@ function initProfilePanel() {
   };
 
   const updateSummary = () => {
-    // Убираем обновление несуществующих элементов
-    // summaryShoe.textContent = profile.shoe_size || "Не заполнено";
-    // summaryClothing.textContent = profile.clothing_size || "Не заполнено";
-    // summaryCity.textContent = profile.city || "Не заполнено";
-    // summaryDelivery.textContent = profile.delivery || "Не заполнено";
-    // summaryPhone.textContent = profile.phone || "Не заполнено";
+    summaryShoe.textContent = profile.shoe_size || "Не заполнено";
+    summaryClothing.textContent = profile.clothing_size || "Не заполнено";
+    summaryCity.textContent = profile.city || "Не заполнено";
+    summaryDelivery.textContent = profile.delivery || "Не заполнено";
+    summaryPhone.textContent = profile.phone || "Не заполнено";
   };
 
   const toggleProfileForm = (showForm) => {
