@@ -6,8 +6,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List
 
-from aiogram.client.default import DefaultBotProperties
 from aiogram import Bot, Dispatcher, F
+from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart, Command
 from aiogram.fsm.context import FSMContext
@@ -363,6 +363,12 @@ async def cmd_help(message: Message) -> None:
 
 
 async def on_unknown_message(message: Message) -> None:
+    # Записываем все сообщения для отладки
+    with open("all_messages.log", "a", encoding="utf-8") as f:
+        f.write(f"\n=== UNKNOWN {datetime.now().isoformat()} ===\n")
+        f.write(f"Content type: {message.content_type}\n")
+        f.write(f"Message: {message}\n")
+    
     await message.answer(
         "Не понимаю это сообщение.\n"
         "Используйте кнопки или команду /start, чтобы вернуться в главное меню."
@@ -370,8 +376,22 @@ async def on_unknown_message(message: Message) -> None:
 
 
 async def on_webapp_data(message: Message) -> None:
+    # Записываем все входящие данные для отладки
+    with open("all_messages.log", "a", encoding="utf-8") as f:
+        f.write(f"\n=== {datetime.now().isoformat()} ===\n")
+        f.write(f"Content type: {message.content_type}\n")
+        f.write(f"Message: {message}\n")
+        if hasattr(message, 'web_app_data') and message.web_app_data:
+            f.write(f"WebApp data: {message.web_app_data.data}\n")
+    
     print(f"[DEBUG] on_webapp_data called, message type: {message.content_type}")  # Отладочный вывод
     print(f"[DEBUG] message: {message}")  # Отладочный вывод
+    
+    # Если это не WebApp данные, выходим
+    if not hasattr(message, 'web_app_data') or not message.web_app_data:
+        await on_unknown_message(message)
+        return
+    
     try:
         payload: dict[str, Any] = json.loads(message.web_app_data.data)
         print(f"[DEBUG] web_app_data: {message.web_app_data}")  # Отладочный вывод
@@ -696,7 +716,7 @@ async def main() -> None:
     dp.message.register(cmd_set_status, Command("setstatus"))
     dp.message.register(cmd_status_orders, Command("status"))
     dp.message.register(cmd_order_history, Command("history"))
-    dp.message.register(on_webapp_data, F.web_app_data)
+    dp.message.register(on_webapp_data)  # Обрабатываем все сообщения для отладки
     dp.message.register(on_unknown_message)
 
     dp.callback_query.register(on_main_menu, F.data == "back:main")
