@@ -2,8 +2,28 @@ const BOT_URL = "https://t.me/dnkstock_bot/dnk";
 const ADMIN_ID = 957766610;
 
 // Supabase настройки
+const // SUPABASE_URL = "https://uobhzpqzqybhfcdberky.supabase.co";
+const // SUPABASE_KEY = "sb_publishable_wbMNPJ4s_fiyHDR_TrxcDg_w_sbaHcH";
 
 // Функция для сохранения заказа в Supabase
+async function saveOrderToSupabase(order) {
+  try {
+    const response = await fetch(`${// SUPABASE_URL}/rest/v1/orders`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": // SUPABASE_KEY,
+        "Authorization": `Bearer ${// SUPABASE_KEY}`,
+      },
+      body: JSON.stringify({
+        user_id: order.user_id,
+        username: order.username,
+        full_name: order.full_name,
+        items: order.items,
+        total: order.total,
+        profile: order.profile,
+        items_summary: order.items_summary,
+      }),
     });
     if (!response.ok) {
       console.error("Failed to save order to Supabase:", await response.text());
@@ -16,6 +36,284 @@ const ADMIN_ID = 957766610;
 }
 
 // Функция для загрузки всех заказов из Supabase
+async function fetchAllOrdersFromSupabase() {
+  try {
+    const response = await fetch(
+      `${// SUPABASE_URL}/rest/v1/orders?order=created_at.desc&limit=100`,
+      {
+        headers: {
+          "apikey": // SUPABASE_KEY,
+          "Authorization": `Bearer ${// SUPABASE_KEY}`,
+        },
+      }
+    );
+    if (!response.ok) {
+      console.error("Failed to fetch orders:", await response.text());
+      return [];
+    }
+    return await response.json();
+  } catch (e) {
+    console.error("Error fetching from Supabase:", e);
+    return [];
+  }
+}
+
+const CATALOG = {
+  sneakers: [
+    {
+      id: "snk1",
+      name: "Nike Air Max 270",
+      price: 15990,
+      desc: "Оригинальные Nike Air Max 270. Размеры 36-45.",
+      emoji: "👟",
+    },
+    {
+      id: "snk2",
+      name: "Adidas Yeezy Boost 350",
+      price: 24990,
+      desc: "Adidas Yeezy Boost 350 V2. Лимитированная коллекция.",
+      emoji: "🌀",
+    },
+  ],
+  clothes: [
+    {
+      id: "cl1",
+      name: "Худи Essentials",
+      price: 7990,
+      desc: "Уютное худи oversize. Размеры XS-XL.",
+      emoji: "🧥",
+    },
+    {
+      id: "cl2",
+      name: "Футболка Basic",
+      price: 2990,
+      desc: "Базовая хлопковая футболка, много цветов.",
+      emoji: "👕",
+    },
+  ],
+};
+
+const CATEGORIES = {
+  sneakers: "Кроссовки",
+  clothes: "Одежда",
+};
+
+let cart = {};
+let profile = {
+  shoe_size: "",
+  clothing_size: "",
+  city: "",
+  delivery: "",
+  phone: "",
+};
+
+function isProfileComplete() {
+  return (
+    profile.shoe_size &&
+    profile.clothing_size &&
+    profile.city &&
+    profile.delivery &&
+    profile.phone
+  );
+}
+
+const BY_CITIES = [
+  "минск",
+  "брест",
+  "витебск",
+  "гродно",
+  "гомель",
+  "могилёв",
+  "могилев",
+  "барановичи",
+  "бобруйск",
+  "борисов",
+  "лида",
+  "молодечно",
+  "орша",
+  "пинск",
+  "полоцк",
+  "новополоцк",
+  "солигорск",
+  "мозырь",
+];
+
+const DELIVERY_OPTIONS = ["Личная встреча", "Европочта", "Белпочта"];
+
+function formatPrice(value) {
+  return value.toLocaleString("ru-RU") + " ₽";
+}
+
+function initTelegram() {
+  if (!window.Telegram || !window.Telegram.WebApp) {
+    return;
+  }
+  const tg = window.Telegram.WebApp;
+  window.tg = tg;
+  tg.ready();
+  tg.expand();
+  if (tg.setHeaderColor) tg.setHeaderColor("#0f1115");
+  if (tg.setBackgroundColor) tg.setBackgroundColor("#050509");
+}
+
+function getTelegram() {
+  return window.tg || window.Telegram?.WebApp || null;
+}
+
+function sendWebAppData(payload) {
+  const tg = getTelegram();
+  console.log("Telegram WebApp object:", tg);
+  
+  if (!tg) {
+    alert("❌ Ошибка: Telegram WebApp не найден\n\nУбедитесь, что приложение открыто из Telegram");
+    return false;
+  }
+  
+  if (!tg.sendData) {
+    alert("❌ Ошибка: метод sendData не доступен\n\nВозможно, устаревшая версия Telegram");
+    return false;
+  }
+  
+  try {
+    console.log("Sending order data to bot:", payload);
+    tg.sendData(JSON.stringify(payload));
+    console.log("Order data sent successfully");
+    
+    // Визуальное подтверждение
+    alert("✅ Заказ отправлен!\n\nПроверьте сообщения в боте - должен прийти ответ с номером заказа.");
+    return true;
+  } catch (e) {
+    console.error("Failed to send order data:", e);
+    alert(`❌ Ошибка отправки заказа:\n\n${e.message}\n\nПопробуйте ещё раз или напишите менеджеру.`);
+    return false;
+  }
+}
+
+function initQrPanel() {
+  const btn = document.getElementById("qrButton");
+  const panel = document.getElementById("qrPanel");
+  const close = document.getElementById("closeQr");
+  const img = document.getElementById("qrImage");
+
+  if (img) {
+    const url = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(
+      BOT_URL
+    )}`;
+    img.src = url;
+  }
+
+  if (btn) {
+    btn.onclick = () => {
+      panel.classList.remove("hidden");
+    };
+  }
+  if (close) {
+    close.onclick = () => {
+      panel.classList.add("hidden");
+    };
+  }
+}
+
+function loadProfileFromStorage() {
+  try {
+    const raw = localStorage.getItem("dnk_profile_v1");
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    profile = { ...profile, ...data };
+  } catch (_) {}
+}
+
+function saveProfileToStorage() {
+  try {
+    localStorage.setItem("dnk_profile_v1", JSON.stringify(profile));
+  } catch (_) {}
+}
+
+function loadOrdersFromStorage() {
+  try {
+    const raw = localStorage.getItem("dnk_orders_v1");
+    if (!raw) return [];
+    return JSON.parse(raw);
+  } catch (_) {
+    return [];
+  }
+}
+
+function saveOrdersToStorage(orders) {
+  try {
+    localStorage.setItem("dnk_orders_v1", JSON.stringify(orders));
+  } catch (_) {}
+}
+
+function addOrderToStorage(order) {
+  const orders = loadOrdersFromStorage();
+  orders.unshift(order);
+  saveOrdersToStorage(orders);
+  
+  // Сохраняем в Supabase
+  const tg = getTelegram();
+  const userId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null;
+  const username = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.username : null;
+  const fullName = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : null;
+  
+  saveOrderToSupabase({
+    user_id: userId,
+    username: username,
+    full_name: fullName,
+    items: order.items,
+    total: order.total,
+    profile: order.profile,
+    items_summary: order.items_summary,
+  });
+  
+  // Также сохраняем в общий список для админа
+  try {
+    const allRaw = localStorage.getItem("dnk_all_orders");
+    const allOrders = allRaw ? JSON.parse(allRaw) : [];
+    allOrders.unshift(order);
+    // Храним только последние 100 заказов
+    if (allOrders.length > 100) {
+      allOrders.length = 100;
+    }
+    localStorage.setItem("dnk_all_orders", JSON.stringify(allOrders));
+  } catch (_) {}
+}
+
+function normalizePhone(raw) {
+  return raw.replace(/[^\d+]/g, "");
+}
+
+function isValidBelarusPhone(raw) {
+  let p = normalizePhone(raw);
+  if (!p) return false;
+  if (p.startsWith("+")) {
+    p = p.slice(1);
+  }
+  if (p.startsWith("80")) {
+    p = "375" + p.slice(2);
+  }
+  if (!p.startsWith("375")) return false;
+  const rest = p.slice(3);
+  if (!/^(25|29|33|44|17)\d{7}$/.test(rest)) {
+    return false;
+  }
+  return true;
+}
+
+function renderCategories(activeId) {
+  const chips = document.getElementById("categoryChips");
+  chips.innerHTML = "";
+
+  Object.entries(CATEGORIES).forEach(([id, title]) => {
+    const chip = document.createElement("button");
+    chip.className = "chip" + (id === activeId ? " active" : "");
+    chip.textContent = title;
+    chip.onclick = () => {
+      renderCategories(id);
+      renderProducts(id);
+    };
+    chips.appendChild(chip);
+  });
 }
 
 function renderProducts(categoryId) {
@@ -683,6 +981,42 @@ function initProfilePanel() {
 
   async function loadAllOrdersFromStorage() {
     // Загружаем из Supabase
+    return await fetchAllOrdersFromSupabase();
+  }
+
+  async function toggleAdminOrders() {
+    isAdminOrdersOpen = !isAdminOrdersOpen;
+    
+    if (isAdminOrdersOpen) {
+      await renderAdminOrders();
+      adminOrdersContent.classList.remove("hidden");
+    } else {
+      adminOrdersContent.classList.add("hidden");
+    }
+  }
+
+  // Показываем админ-панель если пользователь - админ
+  if (adminPanelButton && checkIsAdmin()) {
+    adminPanelButton.classList.remove("hidden");
+    adminPanelButton.onclick = toggleAdminOrders;
+  }
+
+  // Функция для сохранения всех заказов (для синхронизации)
+  window.saveAllOrders = function(orders) {
+    try {
+      localStorage.setItem("dnk_all_orders", JSON.stringify(orders));
+    } catch (_) {}
+  };
+
+  closeSearch.onclick = () => {
+    setActiveTab("catalog");
+  };
+
+  // Закрытие заказов - больше не используется, так как заказы в выпадающем блоке
+  
+  searchInput.addEventListener("input", (e) => {
+    renderSearchResults(e.target.value);
+  });
 
   save.onclick = () => {
     clearErrors();
