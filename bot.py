@@ -732,6 +732,10 @@ async def main() -> None:
     dp = Dispatcher(storage=storage)
 
     dp.message.register(cmd_start, CommandStart())
+    dp.message.register(cmd_help, Command("help"))
+    dp.message.register(cmd_orders, Command("orders"))
+    dp.message.register(cmd_myorders, Command("myorders"))
+    dp.message.register(cmd_order_detail, Command("order"))
     dp.message.register(debug_all_messages)  # Логируем все сообщения
 
     dp.callback_query.register(on_main_menu, F.data == "back:main")
