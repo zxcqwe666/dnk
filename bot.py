@@ -709,17 +709,7 @@ async def main() -> None:
     await init_db()
     dp = Dispatcher(storage=storage)
 
-    dp.message.register(cmd_start, CommandStart())
-    dp.message.register(cmd_help, Command("help"))
-    dp.message.register(cmd_orders, Command("orders"))
-    dp.message.register(cmd_myorders, Command("myorders"))
-    dp.message.register(cmd_order_detail, Command("order"))
-    dp.message.register(cmd_set_status, Command("setstatus"))
-    dp.message.register(cmd_status_orders, Command("status"))
-    dp.message.register(cmd_order_history, Command("history"))
-    dp.message.register(debug_all_messages)  # Логируем все сообщения
-    dp.message.register(on_webapp_data, F.web_app_data)  # Обрабатываем WebApp
-    dp.message.register(on_unknown_message)
+    dp.message.register(debug_all_messages)  # Только логируем все сообщения
 
     dp.callback_query.register(on_main_menu, F.data == "back:main")
     dp.callback_query.register(on_back, F.data.startswith("back:"))
