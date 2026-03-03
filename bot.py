@@ -375,21 +375,22 @@ async def on_unknown_message(message: Message) -> None:
     )
 
 
-async def on_webapp_data(message: Message) -> None:
-    # Записываем все входящие данные для отладки
+async def debug_all_messages(message: Message) -> None:
+    # Записываем все входящие сообщения для отладки
     with open("all_messages.log", "a", encoding="utf-8") as f:
-        f.write(f"\n=== {datetime.now().isoformat()} ===\n")
+        f.write(f"\n=== DEBUG {datetime.now().isoformat()} ===\n")
         f.write(f"Content type: {message.content_type}\n")
         f.write(f"Message: {message}\n")
         if hasattr(message, 'web_app_data') and message.web_app_data:
             f.write(f"WebApp data: {message.web_app_data.data}\n")
-    
+
+
+async def on_webapp_data(message: Message) -> None:
     print(f"[DEBUG] on_webapp_data called, message type: {message.content_type}")  # Отладочный вывод
     print(f"[DEBUG] message: {message}")  # Отладочный вывод
     
     # Если это не WebApp данные, выходим
     if not hasattr(message, 'web_app_data') or not message.web_app_data:
-        await on_unknown_message(message)
         return
     
     try:
@@ -716,7 +717,8 @@ async def main() -> None:
     dp.message.register(cmd_set_status, Command("setstatus"))
     dp.message.register(cmd_status_orders, Command("status"))
     dp.message.register(cmd_order_history, Command("history"))
-    dp.message.register(on_webapp_data)  # Обрабатываем все сообщения для отладки
+    dp.message.register(debug_all_messages)  # Логируем все сообщения
+    dp.message.register(on_webapp_data, F.web_app_data)  # Обрабатываем WebApp
     dp.message.register(on_unknown_message)
 
     dp.callback_query.register(on_main_menu, F.data == "back:main")
