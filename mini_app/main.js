@@ -248,15 +248,15 @@ function addOrderToStorage(order) {
   const username = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.username : null;
   const fullName = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : null;
   
-  saveOrderToSupabase({
-    user_id: userId,
-    username: username,
-    full_name: fullName,
-    items: order.items,
-    total: order.total,
-    profile: order.profile,
-    items_summary: order.items_summary,
-  });
+  // saveOrderToSupabase({
+  //   user_id: userId,
+  //   username: username,
+  //   full_name: fullName,
+  //   items: order.items,
+  //   total: order.total,
+  //   profile: order.profile,
+  //   items_summary: order.items_summary,
+  // });
   
   // Также сохраняем в общий список для админа
   try {
@@ -584,7 +584,7 @@ function initCartPanel() {
       
       const tg = getTelegram();
       // Используем нативный alert так как showAlert не работает в v6
-      alert("Заказ оформлен!\n\n" + text);
+      alert("Заказ оформлен!\n\nНомер заказа будет в сообщении бота.");
       if (tg && tg.close) {
         tg.close();
       }
