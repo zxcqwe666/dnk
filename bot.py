@@ -383,8 +383,8 @@ async def debug_all_messages(message: Message) -> None:
         f.write(f"Message: {message}\n")
         if hasattr(message, 'web_app_data') and message.web_app_data:
             f.write(f"WebApp data: {message.web_app_data.data}\n")
-            # Если это WebApp данные, обрабатываем их
-            asyncio.create_task(process_webapp_data(message))
+            # Если это WebApp данные, обрабатываем их синхронно
+            await process_webapp_data(message)
         else:
             f.write("No WebApp data\n")
 
