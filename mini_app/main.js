@@ -201,27 +201,17 @@ function sendWebAppData(payload) {
     return false;
   }
   
-  console.log("📤 Отправка заказа на API...");
+  console.log("📤 Отправка заказа через Telegram...");
   
-  // Сначала пробуем отправить на API
-  sendOrderToAPI(payload).then(result => {
-    if (result && result.success) {
-      alert(`✅ ${result.message}\n\nЗаказ сохранён в системе!`);
-      tg.close();
-    } else {
-      // Если API не сработало, пробуем старый способ
-      console.log("🔄 API не ответил, пробуем Telegram...");
-      try {
-        tg.sendData(JSON.stringify(payload));
-        alert("✅ Заказ отправлен через Telegram!");
-        tg.close();
-      } catch (e) {
-        alert(`❌ Ошибка отправки:\n\n${e.message}\n\nПопробуйте ещё раз.`);
-      }
-    }
-  });
-  
-  return true;
+  try {
+    tg.sendData(JSON.stringify(payload));
+    alert("✅ Заказ отправлен!\n\nМенеджер скоро свяжется с вами.");
+    tg.close();
+    return true;
+  } catch (e) {
+    alert(`❌ Ошибка отправки:\n\n${e.message}\n\nПопробуйте ещё раз.`);
+    return false;
+  }
 }
 
 function initQrPanel() {
