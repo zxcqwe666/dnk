@@ -709,7 +709,8 @@ async def main() -> None:
     await init_db()
     dp = Dispatcher(storage=storage)
 
-    dp.message.register(debug_all_messages)  # Только логируем все сообщения
+    dp.message.register(cmd_start, CommandStart())
+    dp.message.register(debug_all_messages)  # Логируем все сообщения
 
     dp.callback_query.register(on_main_menu, F.data == "back:main")
     dp.callback_query.register(on_back, F.data.startswith("back:"))
