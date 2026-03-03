@@ -558,13 +558,7 @@ function initCartPanel() {
       );
     });
 
-    lines.push(`\nИтого: ${formatPrice(total)}`);
-    lines.push(
-      "\nОтправьте этот заказ менеджеру в чат, указав ваш размер, город и способ доставки."
-    );
-
-    const text = lines.join("\n");
-
+    // Отправляем заказ в бота
     const sent = sendWebAppData({
       type: "order",
       items: cart,
