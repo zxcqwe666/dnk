@@ -3,6 +3,7 @@ import json
 import logging
 import os
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any, Dict, List
 
 from aiogram.client.default import DefaultBotProperties
@@ -29,7 +30,8 @@ from db import (
     save_user_profile,
     update_order_status,
     get_order_status_history,
-    fetch_orders_by_status
+    fetch_orders_by_status,
+    fetch_user_orders
 )
 
 
@@ -381,6 +383,16 @@ async def on_webapp_data(message: Message) -> None:
 
     kind = payload.get("type")
     user = message.from_user
+    
+    print(f"[DEBUG] Received payload type: {kind}")
+    print(f"[DEBUG] Payload content: {payload}")
+    
+    # Записываем в файл для отладки
+    with open("debug.log", "a", encoding="utf-8") as f:
+        f.write(f"\n=== {datetime.now().isoformat()} ===\n")
+        f.write(f"Type: {kind}\n")
+        f.write(f"Payload: {payload}\n")
+        f.write(f"User: {user.id} ({user.username})\n")
 
     if kind == "order":
         # Проверка структуры заказа
