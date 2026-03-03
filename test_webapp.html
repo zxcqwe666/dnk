@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test WebApp</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <h1>Test WebApp</h1>
+    <button onclick="testSendData()">Test Send Data</button>
+    <div id="result"></div>
+    
+    <script>
+        function testSendData() {
+            const tg = window.Telegram.WebApp;
+            console.log("Telegram WebApp:", tg);
+            
+            if (!tg) {
+                document.getElementById('result').innerHTML = "❌ Telegram WebApp не найден";
+                return;
+            }
+            
+            const testData = {
+                type: "order",
+                items: {"test": 1},
+                total: 100,
+                profile: {"city": "Тест", "phone": "123"}
+            };
+            
+            try {
+                tg.sendData(JSON.stringify(testData));
+                document.getElementById('result').innerHTML = "✅ Данные отправлены!";
+                console.log("Test data sent:", testData);
+            } catch (e) {
+                document.getElementById('result').innerHTML = "❌ Ошибка: " + e.message;
+                console.error("Error:", e);
+            }
+        }
+        
+        // Инициализация
+        window.Telegram.WebApp.ready();
+    </script>
+</body>
+</html>
