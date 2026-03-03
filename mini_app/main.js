@@ -1,6 +1,39 @@
 const BOT_URL = "https://t.me/dnkstock_bot/dnk";
 const ADMIN_ID = 957766610;
 
+// API функции
+const API_BASE = 'http://localhost:5001/api';
+
+// Отправка заказа на API сервер
+async function sendOrderToAPI(orderData) {
+  try {
+    const response = await fetch(`${API_BASE}/order`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user_id: orderData.user_id || ADMIN_ID,
+        username: orderData.username || 'emoslutt6666',
+        order_data: orderData
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (response.ok) {
+      console.log('✅ Заказ отправлен на API:', result);
+      return result;
+    } else {
+      console.error('❌ Ошибка API:', result);
+      return null;
+    }
+  } catch (error) {
+    console.error('❌ Ошибка соединения с API:', error);
+    return null;
+  }
+}
+
 // Supabase настройки
 const SUPABASE_URL = "https://uobhzpqzqybhfcdberky.supabase.co";
 const SUPABASE_KEY = "sb_publishable_wbMNPJ4s_fiyHDR_TrxcDg_w_sbaHcH";
@@ -161,7 +194,6 @@ function getTelegram() {
 }
 
 function sendWebAppData(payload) {
-  // Используем прямой доступ как в тестовом WebApp
   const tg = window.Telegram.WebApp;
   
   if (!tg) {
@@ -169,24 +201,27 @@ function sendWebAppData(payload) {
     return false;
   }
   
-  if (!tg.sendData) {
-    alert("❌ Ошибка: метод sendData не доступен\n\nВозможно, устаревшая версия Telegram");
-    return false;
-  }
+  console.log("📤 Отправка заказа на API...");
   
-  try {
-    console.log("Sending order data to bot:", payload);
-    tg.sendData(JSON.stringify(payload));
-    console.log("Order data sent successfully");
-    
-    // Визуальное подтверждение
-    alert("✅ Заказ отправлен!\n\nПроверьте сообщения в боте - должен прийти ответ с номером заказа.");
-    return true;
-  } catch (e) {
-    console.error("Failed to send order data:", e);
-    alert(`❌ Ошибка отправки заказа:\n\n${e.message}\n\nПопробуйте ещё раз или напишите менеджеру.`);
-    return false;
-  }
+  // Сначала пробуем отправить на API
+  sendOrderToAPI(payload).then(result => {
+    if (result && result.success) {
+      alert(`✅ ${result.message}\n\nЗаказ сохранён в системе!`);
+      tg.close();
+    } else {
+      // Если API не сработало, пробуем старый способ
+      console.log("🔄 API не ответил, пробуем Telegram...");
+      try {
+        tg.sendData(JSON.stringify(payload));
+        alert("✅ Заказ отправлен через Telegram!");
+        tg.close();
+      } catch (e) {
+        alert(`❌ Ошибка отправки:\n\n${e.message}\n\nПопробуйте ещё раз.`);
+      }
+    }
+  });
+  
+  return true;
 }
 
 function initQrPanel() {

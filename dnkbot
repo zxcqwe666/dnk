@@ -1,0 +1,139 @@
+#!/bin/bash
+
+# DNK Bot - универсальная команда запуска
+cd /Users/ilasudilovskij/tgbot
+
+echo "🚀 DNK Bot Launcher"
+echo "=================="
+
+# Проверяем зависимости
+check_dependencies() {
+    echo "📦 Проверка зависимостей..."
+    
+    # Проверяем Flask
+    if ! python3 -c "import flask" 2>/dev/null; then
+        echo "⚠️ Flask не найден. Устанавливаю..."
+        pip3 install flask
+    fi
+    
+    # Проверяем requests
+    if ! python3 -c "import requests" 2>/dev/null; then
+        echo "⚠️ requests не найден. Устанавливаю..."
+        pip3 install requests
+    fi
+    
+    echo "✅ Зависимости проверены"
+}
+
+# Запуск API сервера
+start_api_server() {
+    echo "🔥 Запуск API сервера..."
+    python3 api_server.py &
+    API_PID=$!
+    echo "📡 API сервер запущен (PID: $API_PID)"
+    sleep 2
+}
+
+# Запуск бота
+start_bot() {
+    echo "🤖 Запуск бота..."
+    python3 api_bot.py &
+    BOT_PID=$!
+    echo "📱 Бот запущен (PID: $BOT_PID)"
+}
+
+# Остановка всех процессов
+stop_all() {
+    echo "🛑 Остановка всех процессов..."
+    pkill -f "api_server.py" 2>/dev/null
+    pkill -f "api_bot.py" 2>/dev/null
+    echo "✅ Все процессы остановлены"
+}
+
+# Статус системы
+show_status() {
+    echo "📊 Статус системы:"
+    
+    if pgrep -f "api_server.py" > /dev/null; then
+        echo "🟢 API сервер: работает"
+    else
+        echo "🔴 API сервер: не работает"
+    fi
+    
+    if pgrep -f "api_bot.py" > /dev/null; then
+        echo "🟢 Бот: работает"
+    else
+        echo "🔴 Бот: не работает"
+    fi
+}
+
+# Тестирование
+test_system() {
+    echo "🧪 Тестирование системы..."
+    
+    # Тест API
+    if curl -s http://localhost:5000/api/health > /dev/null; then
+        echo "✅ API сервер отвечает"
+    else
+        echo "❌ API сервер не отвечает"
+    fi
+    
+    # Тест базы данных
+    if [ -f "dnk.sqlite3" ]; then
+        echo "✅ База данных доступна"
+    else
+        echo "❌ База данных не найдена"
+    fi
+}
+
+# Главное меню
+case "$1" in
+    "start")
+        check_dependencies
+        start_api_server
+        start_bot
+        echo "🎉 DNK Bot запущен!"
+        echo "📱 Используйте /start и /myorders в Telegram"
+        echo "🛑 Остановка: dnkbot stop"
+        ;;
+    "stop")
+        stop_all
+        ;;
+    "restart")
+        stop_all
+        sleep 2
+        check_dependencies
+        start_api_server
+        start_bot
+        echo "🔄 DNK Bot перезапущен!"
+        ;;
+    "status")
+        show_status
+        ;;
+    "test")
+        test_system
+        ;;
+    "api")
+        check_dependencies
+        start_api_server
+        echo "📡 Только API сервер запущен"
+        ;;
+    "bot")
+        start_bot
+        echo "🤖 Только бот запущен"
+        ;;
+    *)
+        echo "🚀 DNK Bot - универсальная команда"
+        echo ""
+        echo "Использование:"
+        echo "  dnkbot start    - Запустить всю систему"
+        echo "  dnkbot stop     - Остановить всё"
+        echo "  dnkbot restart  - Перезапустить"
+        echo "  dnkbot status   - Показать статус"
+        echo "  dnkbot test     - Тестировать"
+        echo "  dnkbot api      - Только API сервер"
+        echo "  dnkbot bot      - Только бот"
+        echo ""
+        echo "Пример: dnkbot start"
+        ;;
+esac
