@@ -35,8 +35,8 @@ async function sendOrderToAPI(orderData) {
 }
 
 // Supabase настройки
-const SUPABASE_URL = "https://uobhzpqzqybhfcdberky.supabase.co";
-const SUPABASE_KEY = "sb_publishable_wbMNPJ4s_fiyHDR_TrxcDg_w_sbaHcH";
+const SUPABASE_URL = "https://mjvvvgclrlfzcdzqreoo.supabase.co";
+const SUPABASE_KEY = "sb_publishable_J-AyVDHZcrspLzOO19ONRQ_PfS0xE9g";
 
 // Функция для сохранения заказа в Supabase
 async function saveOrderToSupabase(order) {
@@ -59,12 +59,15 @@ async function saveOrderToSupabase(order) {
       }),
     });
     if (!response.ok) {
-      console.error("Failed to save order to Supabase:", await response.text());
+      const errText = await response.text();
+      console.error("Failed to save order to Supabase:", errText);
+      return { ok: false, error: errText };
     }
-    return await response.json();
+    const data = await response.json();
+    return { ok: true, data };
   } catch (e) {
     console.error("Error saving to Supabase:", e);
-    return null;
+    return { ok: false, error: String(e) };
   }
 }
 
@@ -558,7 +561,7 @@ function initCartPanel() {
     }
   };
 
-  checkout.onclick = () => {
+  checkout.onclick = async () => {
     if (Object.keys(cart).length === 0) {
       return;
     }
@@ -591,15 +594,7 @@ function initCartPanel() {
       );
     });
 
-    // Отправляем заказ в бота
-    const sent = sendWebAppData({
-      type: "order",
-      items: cart,
-      total,
-      profile,
-    });
-    if (sent) {
-      // Сохраняем заказ в localStorage
+    // Сохраняем заказ в localStorage
       const orderId = Date.now();
       const itemsSummary = Object.entries(cart).map(([id, qty]) => {
         const product = CATALOG.sneakers.find(p => p.id === id) || CATALOG.clothes.find(p => p.id === id);
@@ -614,8 +609,28 @@ function initCartPanel() {
         items_summary: itemsSummary,
         created_at: new Date().toISOString()
       });
-      
+
       const tg = getTelegram();
+      const tgUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
+      const userId = tgUser ? tgUser.id : 0;
+      const username = tgUser ? tgUser.username : null;
+      const fullName = tgUser ? tgUser.first_name : null;
+
+      const saveResult = await saveOrderToSupabase({
+        user_id: userId,
+        username: username || "unknown",
+        full_name: fullName,
+        items: cart,
+        total,
+        profile,
+        items_summary: itemsSummary,
+      });
+
+      if (!saveResult || !saveResult.ok) {
+        alert("❌ Не удалось сохранить заказ. Попробуйте ещё раз.");
+        return;
+      }
+      
       // Используем нативный alert так как showAlert не работает в v6
       alert("Заказ оформлен!\n\nНомер заказа будет в сообщении бота.");
       if (tg && tg.close) {
@@ -629,13 +644,6 @@ function initCartPanel() {
       } else {
         panel.classList.add("hidden");
       }
-    } else {
-      alert(text);
-      cart = {};
-      updateCartBadge();
-      renderCart();
-      panel.classList.add("hidden");
-    }
   };
 }
 
@@ -1003,8 +1011,9 @@ function initProfilePanel() {
   }
 
   async function loadAllOrdersFromStorage() {
-    // Загружаем из Supabase
-    return await fetchAllOrdersFromSupabase();
+    // RLS блокирует SELECT для публичного ключа. Для админ-панели в клиенте
+    // показываем только локальную историю (localStorage).
+    return loadOrdersFromStorage();
   }
 
   async function toggleAdminOrders() {
