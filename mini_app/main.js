@@ -47,6 +47,7 @@ async function saveOrderToSupabase(order) {
         "Content-Type": "application/json",
         "apikey": SUPABASE_KEY,
         "Authorization": `Bearer ${SUPABASE_KEY}`,
+        "Prefer": "return=representation",
       },
       body: JSON.stringify({
         user_id: order.user_id,
@@ -58,13 +59,28 @@ async function saveOrderToSupabase(order) {
         items_summary: order.items_summary,
       }),
     });
+    const bodyText = await response.text();
+
     if (!response.ok) {
-      const errText = await response.text();
-      console.error("Failed to save order to Supabase:", errText);
-      return { ok: false, error: errText };
+      console.error(
+        "Failed to save order to Supabase:",
+        response.status,
+        bodyText
+      );
+      return { ok: false, error: `${response.status}: ${bodyText}` };
     }
-    const data = await response.json();
-    return { ok: true, data };
+
+    if (!bodyText) {
+      return { ok: true, data: null };
+    }
+
+    try {
+      const data = JSON.parse(bodyText);
+      return { ok: true, data };
+    } catch (e) {
+      console.error("Supabase returned non-JSON:", bodyText);
+      return { ok: true, data: null };
+    }
   } catch (e) {
     console.error("Error saving to Supabase:", e);
     return { ok: false, error: String(e) };
